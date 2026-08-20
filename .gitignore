@@ -1,0 +1,36 @@
+# --- credencial: nunca, em hipótese alguma ---
+.env
+.env.*
+*.pem
+*.key
+.credentials.json
+**/.credentials.json
+claude/**/.env*
+mcp-needs-auth-cache.json
+
+# --- estado de sessão do Claude Code (não é configuração, é rastro de uso) ---
+claude/projects/
+claude/sessions/
+claude/shell-snapshots/
+claude/file-history/
+claude/cache/
+claude/session-env/
+claude/plans/
+claude/backups/
+claude/history.jsonl
+claude/statsig/
+claude/ide/
+claude/todos/
+
+# --- instalado por gerenciador externo, não versionado (ver claude/MANIFEST.md) ---
+claude/plugins/
+
+# --- backups locais gerados pelo install.sh ---
+backups-locais/
+*.bak
+*.bak-*
+
+# --- sistema ---
+.DS_Store
+node_modules/
+*.log
