@@ -76,6 +76,11 @@ chamados por mim). Categoria A.
 | rtk-proxy.mjs | Antes de rodar um comando de leitura no terminal, resume o resultado para gastar menos tokens da conversa. Nunca mexe em comando que escreve ou apaga algo, e se der erro deixa o comando original passar direto — nunca trava o trabalho por causa dele. | A | `./install.sh` (copia `claude/hooks/rtk-proxy.mjs`) |
 | lint-gate.mjs | Depois que eu crio ou edito um arquivo, roda o verificador de qualidade de código só naquele arquivo — e só avisa, nunca bloqueia. Bloquear travaria o trabalho no skale-insight, que já tem 155 avisos acumulados de antes. | A | `./install.sh` (copia `claude/hooks/lint-gate.mjs`) |
 | orchestration-mode.mjs | A cada mensagem minha, ativa no Claude Code o modo "chefe de equipe": ele delega para agentes especialistas em vez de tentar fazer tudo sozinho na mesma conversa. | A | `./install.sh` (copia `claude/hooks/orchestration-mode.mjs`) |
+| bootstrap-projeto.mjs | Ao abrir um projeto pela primeira vez, lista o que falta ali (mapa do código, CLAUDE.md, regras, integrações) explicando para que serve cada coisa, e **oferece** criar. Nunca executa sozinho, pergunta uma vez só e nunca mais. | A | `./install.sh` |
+| secret-scan.mjs | Antes de gravar qualquer arquivo, recusa a escrita se o conteúdo tiver cara de senha, chave ou token. É o único que bloqueia de verdade — e bloqueia de propósito. | A | `./install.sh` |
+| guard-main-branch.mjs | Antes de um commit ou envio direto na branch principal, pede confirmação. Branch de trabalho passa direto. | A | `./install.sh` |
+| validate-settings-schema.mjs | Depois de editar um arquivo de configuração do Claude Code, avisa se ele ficou com formato inválido — antes de você descobrir na próxima sessão, quando nada carrega. | A | `./install.sh` |
+| large-file-warning.mjs | Avisa quando um arquivo passa de ~350 linhas, sugerindo dividir. Só avisa. | A | `./install.sh` |
 
 ---
 
