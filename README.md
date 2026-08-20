@@ -114,7 +114,7 @@ Os três **falham abertos**: se algum quebrar, ele sai calado e o comando roda n
 **Onde fica o log:** `~/.claude/logs/comandos.jsonl` — uma linha por comando. Para ler o que aconteceu hoje:
 
 ```bash
-tail -50 ~/.claude/logs/comandos.jsonl | jq -r '"\(.hora)  \(.projeto)  \(.comando)"'
+tail -50 ~/.claude/logs/comandos.jsonl | jq -r '"\(.data)  \(.projeto)  \(.comando)"'
 ```
 
 **Como voltar de um checkpoint:**

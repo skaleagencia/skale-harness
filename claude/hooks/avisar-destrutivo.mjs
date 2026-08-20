@@ -80,8 +80,12 @@ const PADROES = [
     msg: 'isto grava bytes direto num disco/arquivo, podendo sobrescrever dado inteiro sem confirmar.' },
   { re: /\bmkfs\b/i,
     msg: 'isto formata um disco/partição — apaga tudo que havia nele.' },
-  { re: />\s*\/dev\//,
-    msg: 'isto escreve direto num dispositivo do sistema — pode corromper disco ou travar a máquina.' },
+  // Escrever num dispositivo de disco é destrutivo; escrever em /dev/null é o contrário —
+  // é jogar fora saída de erro, e aparece em quase todo comando. O padrão antigo (`> /dev/`)
+  // não separava os dois e disparava o tempo todo. Aviso que aparece sempre vira ruído, e
+  // ruído treina a ignorar o aviso — que é exatamente o que este hook existe para evitar.
+  { re: />\s*\/dev\/(disk|rdisk|sd[a-z]|nvme|hd[a-z])/,
+    msg: 'isto escreve direto num disco do sistema — pode corromper o disco ou travar a máquina.' },
   { re: /\bchmod\s+-R\s+777\b/i,
     msg: 'isto libera permissão total e recursiva — qualquer processo passa a poder alterar esses arquivos.' },
   { re: /\bsudo\b/i,
