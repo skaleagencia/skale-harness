@@ -96,6 +96,48 @@ instalar_arquivos() {
   chmod +x "$CLAUDE_HOME"/hooks/* 2>/dev/null || true
 }
 
+# Categoria B: o que não cabe num repositório — plugins baixados de marketplace.
+# A lista não é redigitada aqui: sai do próprio settings.json versionado, então adicionar um
+# plugin no dia a dia já o inclui na instalação da próxima máquina, sem ninguém lembrar de nada.
+instalar_plugins() {
+  titulo "Plugins de marketplace"
+
+  if ! command -v claude >/dev/null 2>&1; then
+    amarelo "  Claude Code não encontrado no PATH — pulando."
+    return 0
+  fi
+
+  local instalados
+  instalados="$(claude plugin list 2>/dev/null || true)"
+
+  # 1. Os marketplaces primeiro: sem eles, não há de onde baixar plugin nenhum.
+  while IFS=$'\t' read -r nome origem; do
+    [[ -z "$nome" ]] && continue
+    if grep -q "$nome" <<<"$instalados"; then
+      echo "  ja  marketplace $nome"
+    elif claude plugin marketplace add "$origem" --scope user >/dev/null 2>&1; then
+      verde "  ok  marketplace $nome"
+    else
+      amarelo "  !!  marketplace $nome falhou — resolver:  claude plugin marketplace add $origem"
+    fi
+  done < <(jq -r '.extraKnownMarketplaces // {} | to_entries[]
+                  | [.key, (if .value.source.source == "github" then .value.source.repo else .value.source.url end)]
+                  | @tsv' "$ORIGEM/settings.json" 2>/dev/null)
+
+  # 2. Os plugins. Reinstalar o que já existe é perda de tempo, então confere antes.
+  while IFS= read -r plugin; do
+    [[ -z "$plugin" ]] && continue
+    local curto="${plugin%%@*}"
+    if grep -q "$curto" <<<"$instalados"; then
+      echo "  ja  $curto"
+    elif claude plugin install "$plugin" >/dev/null 2>&1; then
+      verde "  ok  $curto"
+    else
+      amarelo "  !!  $curto falhou — resolver:  claude plugin install $plugin"
+    fi
+  done < <(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$ORIGEM/settings.json" 2>/dev/null)
+}
+
 # --------------------------------------------------------------- verificação
 
 verificar() {
@@ -129,8 +171,15 @@ verificar() {
   fi
 
   # 3. MCPs — a listagem é lenta, então roda uma vez só e reaproveita.
+  # `timeout` é do GNU coreutils e NÃO existe no macOS: usá-lo direto fazia o comando falhar
+  # e o script reportar que todos os MCPs faltavam, com todos conectados. Falso alarme é pior
+  # que alarme nenhum — treina a ignorar o relatório.
   local mcps
-  mcps="$(timeout 90 claude mcp list 2>/dev/null || true)"
+  if command -v timeout >/dev/null 2>&1; then
+    mcps="$(timeout 90 claude mcp list 2>/dev/null || true)"
+  else
+    mcps="$(claude mcp list 2>/dev/null || true)"
+  fi
 
   for servidor in clickup obsidian context7; do
     if grep -qi "$servidor" <<<"$mcps"; then
@@ -182,7 +231,9 @@ relatorio() {
 
   local n_skills n_agentes n_hooks
   n_skills="$(ls -1 "$ORIGEM/skills" 2>/dev/null | wc -l | tr -d ' ')"
-  n_agentes="$(ls -1 "$ORIGEM/agents" 2>/dev/null | wc -l | tr -d ' ')"
+  # Conta só arquivo que declara um agente de verdade. Relatório que soma documentação junto
+  # esconde o dia em que um agente some.
+  n_agentes="$(grep -l '^model:' "$ORIGEM"/agents/*.md 2>/dev/null | wc -l | tr -d ' ')"
   n_hooks="$(ls -1 "$ORIGEM/hooks" 2>/dev/null | wc -l | tr -d ' ')"
 
   verde "  Configuração: $n_skills skills · $n_agentes agentes · $n_hooks hooks · CLAUDE.md global"
@@ -223,8 +274,14 @@ titulo "Guardando o ~/.claude/ atual antes de mexer"
 fazer_backup
 
 instalar_arquivos
+instalar_plugins
 verificar
 relatorio
+
+echo
+amarelo "  A configuração só passa a valer numa sessão NOVA."
+echo "  O Claude Code mantém tudo em memória e regrava o settings.json a cada aprovação,"
+echo "  então mudança feita com a sessão aberta é apagada. Feche e abra antes de conferir."
 
 echo
 echo "  Para desfazer:  ./install.sh --rollback"

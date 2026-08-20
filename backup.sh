@@ -29,7 +29,9 @@ fi
 # rodar o backup por reflexo, e ver a versão da máquina passar por cima do trabalho — sem aviso,
 # sem nada no Git para recuperar. Se há mudança não commitada em claude/, pergunta antes.
 if git -C "$REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  pendente="$(git -C "$REPO" status --porcelain -- claude/ 2>/dev/null | grep -v '^??' || true)"
+  # Inclui arquivo novo ainda não commitado (`??`): foi justamente um desses — um hook recém-criado
+  # — que se perdeu na primeira versão desta guarda.
+  pendente="$(git -C "$REPO" status --porcelain -- claude/ 2>/dev/null || true)"
   if [[ -n "$pendente" ]]; then
     echo "Atenção: há mudança NÃO COMMITADA em claude/ que este backup vai sobrescrever:"
     echo "$pendente" | sed 's/^/  /'
@@ -64,10 +66,14 @@ for item in "${ITENS[@]}"; do
   if [[ -d "$origem" ]]; then
     # -L segue os atalhos e copia o CONTEÚDO. Sem isso, uma skill que é atalho para outra pasta
     # entra no repositório como um ponteiro para um caminho que só existe nesta máquina.
-    # --delete só dentro da pasta espelhada: o que sumiu da máquina some do espelho, mas os
-    # arquivos do repositório que vivem fora dela (MANIFEST.md) não são tocados.
+    #
+    # SEM --delete, de propósito. Com ele, um arquivo escrito aqui no repositório e ainda não
+    # instalado na máquina era APAGADO pelo backup — foi o que aconteceu com um hook recém-criado
+    # em 2026-08-19. Deixar sobra é chato; apagar trabalho é irreversível. O que sobra é listado
+    # como órfão no fim, para decidir na mão.
+    #
     # Código 23 = "copiou o que dava, um atalho quebrado ficou de fora" — já avisado acima.
-    rsync -aL --delete "${EXCLUDES[@]}" "$origem/" "$DEST/$item/" || [[ $? -eq 23 ]]
+    rsync -aL "${EXCLUDES[@]}" "$origem/" "$DEST/$item/" || [[ $? -eq 23 ]]
     echo "  ok  $item/  ($(find "$DEST/$item" -type f | wc -l | tr -d ' ') arquivos)"
   elif [[ -f "$origem" ]]; then
     rsync -aL "$origem" "$DEST/$item"
@@ -78,6 +84,20 @@ for item in "${ITENS[@]}"; do
 done
 
 echo
+# Órfão: existe no repositório e não na máquina. Pode ser coisa nova esperando ./install.sh,
+# ou resto de algo apagado lá. O script não adivinha qual dos dois — só mostra.
+for item in "${ITENS[@]}"; do
+  [[ -d "$DEST/$item" ]] || continue
+  orfaos="$(cd "$DEST/$item" && find . -type f 2>/dev/null | while read -r f; do
+    [[ -e "$CLAUDE_HOME/$item/${f#./}" ]] || echo "$item/${f#./}"
+  done)"
+  if [[ -n "$orfaos" ]]; then
+    echo "Existe no repositório e não em ~/.claude/ (rode ./install.sh, ou apague se for resto):"
+    echo "$orfaos" | sed 's/^/  ?  /'
+    echo
+  fi
+done
+
 echo "Conferindo se algum segredo entrou junto..."
 if "$REPO/scripts/checar-segredos.sh" "$DEST"; then
   echo
