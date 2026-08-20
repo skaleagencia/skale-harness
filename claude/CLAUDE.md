@@ -118,7 +118,10 @@ atrapalha o raciocínio.
 | Fim de fase, entrega grande | `limpar-projeto` |
 | Projeto novo | `aia-harness:init` + `memoria-do-projeto` |
 | Documentar decisão ou aprendizado | Obsidian (via MCP) |
-| Tarefa de desenvolvimento | ClickUp (via MCP) |
+| "O que tem para fazer", "qual a fila" | `clickup` — mostra a fila deste produto, sem executar nada |
+| "Executa a tarefa X", com id ou link | `clickup-executar` |
+| "Roda a fila", "faz tudo que está pronto" | `clickup-fila` — uma por vez, reportando entre elas |
+| Projeto sem backup e com banco | oferecer o template em `templates/backup-supabase/` |
 | Teste de interface | `agent-browser` — **pedir autorização antes** |
 | Performance, rede, console do navegador | `chrome-devtools` — **pedir autorização antes** |
 

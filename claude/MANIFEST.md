@@ -47,7 +47,7 @@ listados depois da tabela.
 
 ## Skills
 
-Pastas dentro de `~/.claude/skills/`, já versionadas em `claude/skills/` neste repositório (11).
+Pastas dentro de `~/.claude/skills/`, já versionadas em `claude/skills/` neste repositório (16).
 Categoria A — o `install.sh` copia direto, nada para instalar à parte.
 
 | Nome | O que faz | Categoria | Como instalar |
@@ -63,6 +63,11 @@ Categoria A — o `install.sh` copia direto, nada para instalar à parte.
 | revisao-multi-agente | Revisa um código pronto com vários revisores em paralelo, cada um olhando por um ângulo diferente (segurança, correção, performance) — em vez de uma passada só. | A | `./install.sh` (copia `claude/skills/revisao-multi-agente`) |
 | theme-factory | Aplica um visual pronto (cor, fonte) a um material gerado — apresentação, relatório, página — escolhendo entre 10 estilos prontos ou criando um novo na hora. | A | `./install.sh` (copia `claude/skills/theme-factory`) |
 | zerar-avisos-lint | Zera uma pilha de avisos de qualidade de código já acumulados, em lotes controlados, sem quebrar o que já funciona — para quando o lint já existe mas ninguém nunca zerou os avisos. | A | `./install.sh` (copia `claude/skills/zerar-avisos-lint`) |
+| clickup | Mostra a fila de tarefas deste produto no ClickUp — o que está pronto para pegar, em que ordem, e por quê. Não executa nada, não altera nada. | A | `./install.sh` |
+| clickup-executar | Executa uma tarefa do ClickUp do início ao fim: lê a especificação nos comentários, implementa, valida e deixa em Homologação. Nunca move para Deploy nem Concluído — quem valida é você. | A | `./install.sh` |
+| clickup-fila | Executa a fila inteira, uma tarefa por vez, reportando o resultado entre elas. Para e chama você quando aparece pergunta em aberto. | A | `./install.sh` |
+| graphify | Ensina a usar o mapa do código: responder "o que quebra se eu mudar isso" numa consulta, em vez de abrir arquivo por arquivo. | A | `./install.sh` |
+| agent-browser | Ensina a usar o navegador automatizado para testar interface de verdade. Pede autorização antes de abrir — a sessão pode estar logada nas suas contas reais. | A | `./install.sh` |
 
 ---
 
@@ -118,6 +123,17 @@ repositório — só o nome e o comando genérico de registrar cabem aqui.
 | plugin:vercel:vercel | Gerenciaria deploy e ambiente de projetos na Vercel direto da conversa. **Conectado mas não autorizado hoje.** | B | `claude mcp` ou `/mcp` numa sessão interativa, para completar o login |
 
 ---
+
+---
+
+## Templates
+
+Modelos prontos para reaproveitar entre projetos. Não são instalados em lugar nenhum — ficam aqui
+até alguém decidir aplicar num projeto.
+
+| Nome | O que faz | Categoria | Como usar |
+|---|---|---|---|
+| [backup-supabase](../templates/backup-supabase/) | Rotina diária que copia o banco do Supabase para fora dele, criptografada, guardada no Cloudflare R2. Existe porque o plano Free não faz backup nenhum, o Pro guarda só 7 dias, e arquivo de Storage não é coberto em plano nenhum. | A | copiar para o projeto e cadastrar os secrets — ver o [README do template](../templates/backup-supabase/README.md) |
 
 ## O que o Git não traz de volta
 
