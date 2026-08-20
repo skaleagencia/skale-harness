@@ -5,7 +5,9 @@ description: >
   mapeia estrutura de uma pasta. Puramente mecânico: sem decisão, sem julgamento sobre o que fazer
   com o que encontrar. Use para qualquer levantamento de localização antes de outro agente agir.
   Bata várias buscas relacionadas numa única chamada em vez de um agente por busca — cada
-  subagente custa 25-35 mil tokens só pra iniciar, então agrupar economiza.
+  subagente custa 25-35 mil tokens só pra iniciar, então agrupar economiza. Para leitura com
+  julgamento — interpretar arquitetura, padrão ou dependência para embasar uma decisão — use
+  code-explorer, não este agente.
 model: haiku
 ---
 

@@ -279,6 +279,26 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ericsoarese/.claude/hooks/secret-scan.mjs",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ericsoarese/.claude/hooks/guard-main-branch.mjs",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -289,6 +309,21 @@
             "type": "command",
             "command": "node /Users/ericsoarese/.claude/hooks/lint-gate.mjs",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/ericsoarese/.claude/hooks/validate-settings-schema.mjs",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node /Users/ericsoarese/.claude/hooks/large-file-warning.mjs",
+            "timeout": 10
           }
         ]
       }

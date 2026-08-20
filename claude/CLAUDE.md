@@ -155,11 +155,23 @@ especialistas, que têm effort próprio e sobrescrevem a sessão.
 | `security-reviewer` | opus | xhigh | RLS, OWASP, autenticação |
 | `migration-specialist` | opus | xhigh | Migração de banco |
 | `backend-specialist` | opus | high | Lógica de negócio, API |
+| `debugger` | opus | high | Causa raiz de bug e comportamento instável |
+| `devops-engineer` | opus | high | Deploy, CI/CD, operação de produção |
 | `frontend-specialist` | sonnet | high | UI, componente, tela |
-| `code-reviewer` | sonnet | medium | Revisão |
+| `code-archaeologist` | sonnet | high | Entender código legado sem documentação |
+| `code-explorer` | sonnet | high | Ler e **interpretar** arquitetura antes de decidir |
+| `performance-optimizer` | sonnet | high | Gargalo de performance, query lenta, Core Web Vitals |
+| `code-reviewer` | sonnet | medium | Revisão geral |
+| `react-reviewer` | sonnet | medium | Revisão com lente de React: hooks, render, Server/Client |
+| `typescript-reviewer` | sonnet | medium | Revisão com lente de tipagem e assincronismo |
+| `react-build-resolver` | sonnet | medium | Build de React quebrado (Vite, Next, bundler) |
 | `test-writer` | sonnet | medium | Testes |
-| `doc-updater` | haiku | — | Documentação trivial |
-| `explorer` | haiku | — | Buscar, listar, localizar |
+| `documentation-writer` | sonnet | medium | Documentação nova e substancial |
+| `doc-updater` | haiku | — | Documentação trivial, sincronizar texto |
+| `explorer` | haiku | — | **Localizar**: buscar, listar, grep. Não interpreta |
+
+`explorer` e `code-explorer` não são a mesma coisa: o primeiro **acha** (mecânico, barato); o
+segundo **entende** (julgamento). Pedir para achar um arquivo não precisa do segundo.
 
 **O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra: um
 documento de arquitetura pode exigir opus, e um "código" que só renomeia campo roda em haiku. O que
