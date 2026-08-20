@@ -107,6 +107,18 @@ function rodar() {
     }
   }
 
+  if (usaSupabase(cwd) && !temRotinaDeBackup(cwd)) {
+    ofertas.push({
+      chave: 'backup-supabase',
+      texto: 'backup do Supabase — este projeto usa Supabase e não tem rotina de backup ' +
+        'configurada. O plano Free não faz backup nenhum; o Pro guarda só os últimos 7 dias, ' +
+        'numa janela que anda (passou disso, o dado some). E os arquivos do Storage não têm ' +
+        'backup em plano nenhum, nem no Enterprise. Existe um template pronto: dump diário, ' +
+        'criptografado, guardado no Cloudflare R2, com custo zero dentro dos limites grátis. ' +
+        'Configuro? (template em templates/backup-supabase/ do skale-harness)',
+    });
+  }
+
   if (ofertas.length === 0) return; // nada falta: fica calado, sem gravar nada
 
   emitir(ofertas);
@@ -142,6 +154,46 @@ function temInterface(cwd) {
     return Object.keys(deps).some((d) => /\b(react|vue|svelte|next)\b/i.test(d));
   } catch {
     return false; // package.json com JSON quebrado: não trava o hook, só não conta como "tem UI"
+  }
+}
+
+/** Projeto "usa Supabase" se tem a pasta supabase/, variável SUPABASE_ num arquivo de env, ou o client nas dependências. */
+function usaSupabase(cwd) {
+  if (fs.existsSync(path.join(cwd, 'supabase'))) return true;
+  if (temVarSupabaseEmEnv(cwd)) return true;
+  const pkgPath = path.join(cwd, 'package.json');
+  if (!fs.existsSync(pkgPath)) return false;
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) ?? {};
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+    return Object.keys(deps).some((d) => /^@supabase\//.test(d));
+  } catch {
+    return false; // package.json com JSON quebrado: não trava o hook, só não conta como "usa Supabase"
+  }
+}
+
+/** Procura SUPABASE_... nos arquivos de env mais comuns da raiz do projeto — sem varrer a árvore. */
+function temVarSupabaseEmEnv(cwd) {
+  const candidatos = ['.env', '.env.local', '.env.example', '.env.development', '.env.production'];
+  return candidatos.some((nome) => {
+    const p = path.join(cwd, nome);
+    if (!fs.existsSync(p)) return false;
+    try {
+      return /^\s*(export\s+)?SUPABASE_[A-Z0-9_]*\s*=/m.test(fs.readFileSync(p, 'utf8'));
+    } catch {
+      return false;
+    }
+  });
+}
+
+/** Rotina de backup já existe se algum workflow do GitHub tiver "backup" no nome. */
+function temRotinaDeBackup(cwd) {
+  const dir = path.join(cwd, '.github', 'workflows');
+  if (!fs.existsSync(dir)) return false;
+  try {
+    return fs.readdirSync(dir).some((nome) => /backup/i.test(nome));
+  } catch {
+    return false;
   }
 }
 

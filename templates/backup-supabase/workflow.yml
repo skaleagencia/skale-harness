@@ -1,0 +1,168 @@
+name: Backup do Supabase
+
+# ============================================================================================
+# COPIE ESTE ARQUIVO PARA: .github/workflows/backup-supabase.yml (no repositório do projeto)
+#
+# ALTERAR AQUI ao copiar para um projeto novo — são só estas duas linhas em env, mais abaixo:
+#   1. PRODUTO       -> nome curto do produto. Define a pasta usada dentro do bucket do R2.
+#                        Use: skale-insights | skale-crm | skale-finance-pessoal | skale-finance-business
+#   2. USA_STORAGE   -> "true" se o projeto guarda arquivo no Supabase Storage, senão "false"
+#
+# Os scripts (pasta scripts/) vão para: .github/scripts/backup-supabase/ no mesmo repositório.
+# A lista completa dos secrets que precisam existir no GitHub está no README.md deste template.
+# ============================================================================================
+
+on:
+  schedule:
+    - cron: '0 6 * * *'    # backup diário — 06:00 UTC = 03:00 em São Paulo (horário padrão, sem horário de verão)
+    - cron: '0 12 * * 1'   # verificação semanal de saúde — toda segunda-feira, 12:00 UTC
+  workflow_dispatch:        # deixa rodar na mão pelo botão "Run workflow" na aba Actions do GitHub — útil para testar
+
+env:
+  PRODUTO: skale-insights   # <-- ALTERAR
+  USA_STORAGE: "true"       # <-- ALTERAR
+
+jobs:
+  # -------------------------------------------------------------------------------------------
+  # Roda todo dia. Gera os três arquivos do banco, opcionalmente baixa o Storage, criptografa
+  # tudo, sobe para o R2, confere se o tamanho não encolheu de repente e aplica a retenção.
+  # -------------------------------------------------------------------------------------------
+  backup:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 6 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala o CLI do Supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Gera roles.sql, schema.sql e data.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash .github/scripts/backup-supabase/dump.sh dump
+
+      - name: Baixa os arquivos do Storage (só se este projeto usa)
+        if: env.USA_STORAGE == 'true'
+        env:
+          SUPABASE_STORAGE_ENDPOINT: ${{ secrets.SUPABASE_STORAGE_ENDPOINT }}
+          SUPABASE_STORAGE_ACCESS_KEY: ${{ secrets.SUPABASE_STORAGE_ACCESS_KEY }}
+          SUPABASE_STORAGE_SECRET_KEY: ${{ secrets.SUPABASE_STORAGE_SECRET_KEY }}
+        run: bash .github/scripts/backup-supabase/storage-sync.sh dump/storage
+
+      - name: Compacta o Storage baixado num arquivo único
+        if: env.USA_STORAGE == 'true'
+        run: |
+          tar -czf dump/storage.tar.gz -C dump/storage .
+          rm -rf dump/storage
+
+      - name: Criptografa cada arquivo antes de subir (é dado sensível — nunca sobe em texto aberto)
+        env:
+          BACKUP_CHAVE_CRIPTOGRAFIA: ${{ secrets.BACKUP_CHAVE_CRIPTOGRAFIA }}
+        run: |
+          mkdir -p cifrado
+          for arquivo in dump/*; do
+            nome=$(basename "$arquivo")
+            bash .github/scripts/backup-supabase/encrypt.sh "$arquivo" "cifrado/$nome.gpg"
+          done
+
+      - name: Registra o tamanho de cada arquivo de hoje
+        run: |
+          {
+            echo "backup de $PRODUTO em $(date -u +%F)"
+            ls -la cifrado | awk 'NF>=9 {print $9, $5, "bytes"}'
+          } | tee cifrado/manifest.txt
+
+      - name: Sobe para o Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          DATA=$(date -u +%F)
+          aws s3 cp cifrado/ "s3://${{ secrets.R2_BUCKET }}/backups/$PRODUTO/$DATA/" \
+            --recursive --endpoint-url "${{ secrets.R2_ENDPOINT }}"
+
+      - name: Confere se o backup de hoje encolheu muito em relação ao de ontem
+        # Um dump que de repente ficou com menos da metade do tamanho de ontem quase sempre
+        # significa que algo quebrou no meio do caminho (conexão caiu antes de terminar,
+        # tabela grande ficou de fora) — mesmo que nenhum passo anterior tenha dado erro.
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          ONTEM=$(date -u -d 'yesterday' +%F)
+          HOJE_TOTAL=$(du -sb cifrado | cut -f1)
+          ONTEM_TOTAL=$(aws s3 ls "s3://${{ secrets.R2_BUCKET }}/backups/$PRODUTO/$ONTEM/" \
+            --recursive --endpoint-url "${{ secrets.R2_ENDPOINT }}" 2>/dev/null \
+            | awk '{soma += $3} END {print soma+0}')
+          echo "hoje: $HOJE_TOTAL bytes | ontem: $ONTEM_TOTAL bytes"
+          if [[ "$ONTEM_TOTAL" -gt 0 ]] && (( HOJE_TOTAL * 100 < ONTEM_TOTAL * 50 )); then
+            echo "::error::backup de hoje tem menos da metade do tamanho do de ontem — pode ter falhado sem avisar"
+            exit 1
+          fi
+
+      - name: Aplica a política de retenção (apaga o que passou da janela configurada)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          # Descomente e ajuste só se este projeto precisar de uma janela diferente do padrão:
+          # RETENCAO_DIARIA_DIAS: "30"
+          # RETENCAO_SEMANAL_SEMANAS: "12"
+          # RETENCAO_MENSAL_MESES: "24"
+        run: bash .github/scripts/backup-supabase/retention.sh "$PRODUTO"
+
+      - name: Avisa se alguma etapa falhou (além do e-mail padrão do GitHub, que passa despercebido)
+        if: failure()
+        env:
+          BACKUP_ALERTA_WEBHOOK_URL: ${{ secrets.BACKUP_ALERTA_WEBHOOK_URL }}
+        run: |
+          if [[ -n "${BACKUP_ALERTA_WEBHOOK_URL:-}" ]]; then
+            curl -fsS -X POST "$BACKUP_ALERTA_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"Backup do $PRODUTO FALHOU hoje ($(date -u +%F)). Ver: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+              || true
+          else
+            echo "BACKUP_ALERTA_WEBHOOK_URL não configurado — só o e-mail padrão do GitHub vai avisar. Ver README.md."
+          fi
+
+  # -------------------------------------------------------------------------------------------
+  # Roda uma vez por semana (e também quando disparado na mão). Não gera backup novo — só
+  # confere se existe algum com menos de 48 horas. Existe porque o maior risco do backup
+  # caseiro não é ficar sem backup, é ACHAR que tem: o token expira, a rotina para de rodar em
+  # silêncio, e só se descobre no dia da restauração. Este job é a rede de segurança para isso.
+  # -------------------------------------------------------------------------------------------
+  verificacao-semanal:
+    if: github.event.schedule == '0 12 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confere se existe backup de menos de 48 horas
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          HOJE=$(date -u +%F)
+          ONTEM=$(date -u -d 'yesterday' +%F)
+          if aws s3 ls "s3://${{ secrets.R2_BUCKET }}/backups/$PRODUTO/$HOJE/" --endpoint-url "${{ secrets.R2_ENDPOINT }}" >/dev/null 2>&1 || \
+             aws s3 ls "s3://${{ secrets.R2_BUCKET }}/backups/$PRODUTO/$ONTEM/" --endpoint-url "${{ secrets.R2_ENDPOINT }}" >/dev/null 2>&1; then
+            echo "ok: existe backup de $PRODUTO com menos de 48 horas."
+          else
+            echo "::error::nenhum backup de $PRODUTO nas últimas 48 horas — a rotina diária pode estar quebrada"
+            exit 1
+          fi
+
+      - name: Avisa se o backup está desatualizado
+        if: failure()
+        env:
+          BACKUP_ALERTA_WEBHOOK_URL: ${{ secrets.BACKUP_ALERTA_WEBHOOK_URL }}
+        run: |
+          if [[ -n "${BACKUP_ALERTA_WEBHOOK_URL:-}" ]]; then
+            curl -fsS -X POST "$BACKUP_ALERTA_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"ALERTA: $PRODUTO está SEM backup recente (mais de 48h). A rotina diária pode ter parado.\"}" \
+              || true
+          else
+            echo "BACKUP_ALERTA_WEBHOOK_URL não configurado — só o e-mail padrão do GitHub vai avisar. Ver README.md."
+          fi

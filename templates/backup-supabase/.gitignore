@@ -1,0 +1,14 @@
+# Nunca deixa um dump de banco entrar em nenhum repositório, nem privado — dado de produção
+# pode conter informação de paciente (LGPD). Copie estas linhas para o .gitignore do projeto
+# que receber este template.
+
+dump/
+cifrado/
+restauracao-supabase/
+*.sql
+*.sql.gpg
+*.gpg
+storage.tar.gz
+storage.tar.gz.gpg
+manifest.txt
+manifest.txt.gpg
