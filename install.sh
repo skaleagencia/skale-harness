@@ -83,7 +83,8 @@ instalar_arquivos() {
 
     if [[ -d "$origem" ]]; then
       mkdir -p "$CLAUDE_HOME/$item"
-      rsync -a --exclude '.DS_Store' "$origem/" "$CLAUDE_HOME/$item/"
+      # -L pelo mesmo motivo do backup.sh: conteúdo de verdade, não ponteiro para outra pasta.
+      rsync -aL --exclude '.DS_Store' "$origem/" "$CLAUDE_HOME/$item/"
       echo "  ok  $item/  ($(find "$origem" -type f | wc -l | tr -d ' ') arquivos)"
     elif [[ -f "$origem" ]]; then
       rsync -a "$origem" "$CLAUDE_HOME/$item"

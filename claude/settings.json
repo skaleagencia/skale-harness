@@ -306,6 +306,20 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "/Users/ericsoarese/.claude/hooks/bootstrap-projeto.mjs"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
