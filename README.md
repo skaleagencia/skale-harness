@@ -42,6 +42,20 @@ repositório  ── install.sh ──▶  máquina          "aplicar o que est�
 
 Mexeu direto no `~/.claude/`? Rode `./backup.sh` para não perder. Mexeu aqui no repositório? Rode `./install.sh` para valer na máquina.
 
+Na dúvida sobre qual dos dois lados está mais novo:
+
+```bash
+./backup.sh --diferencas    # mostra o que mudou de cada lado, sem copiar nada
+```
+
+Use isso sempre que outra sessão, em outro projeto, puder ter instalado algo no global — um hook novo, uma skill, um agente. O sinal `+` é justamente isso: apareceu na máquina e ainda não está versionado aqui.
+
+> ⚠️ **Rode o `install.sh` com o Claude Code FECHADO.**
+>
+> Ele mantém a configuração em memória e regrava o `settings.json` inteiro a cada aprovação que você dá. Instalar com uma sessão aberta significa ver a mudança ser apagada minutos depois, sem aviso. Aconteceu duas vezes durante a construção deste repositório.
+>
+> A ordem certa é: fechar o Claude Code → `./install.sh` → abrir de novo.
+
 ---
 
 ## Duas categorias de coisa — e por que o MANIFEST existe

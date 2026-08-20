@@ -2,6 +2,9 @@
 #
 # backup.sh — copia a configuração viva de ~/.claude/ para claude/ neste repositório.
 #
+#   ./backup.sh              importa a configuração da máquina para o repositório
+#   ./backup.sh --diferencas mostra o que mudou de cada lado, SEM copiar nada
+#
 # Sentido único: máquina  ->  repositório. Nunca escreve em ~/.claude/ (isso é o install.sh).
 #
 # Lista branca, não lista negra: só entra o que está em ITENS abaixo. Sessão, cache, histórico,
@@ -23,6 +26,66 @@ EXCLUDES=(--exclude '.DS_Store' --exclude 'node_modules/' --exclude '*.log')
 if [[ ! -d "$CLAUDE_HOME" ]]; then
   echo "erro: $CLAUDE_HOME não existe. Nada para importar." >&2
   exit 1
+fi
+
+# Responde a pergunta "alguma coisa mudou na minha máquina sem eu saber?" — por exemplo, uma
+# sessão em outro projeto que instalou um hook novo no global. Sem isto, a única forma de
+# descobrir seria rodar o backup e ler o `git status`, o que já mistura descobrir com copiar.
+comparar() {
+  echo "Comparando ~/.claude/  com  claude/ deste repositório."
+  echo "Nada é copiado — isto só mostra as diferenças."
+  echo
+
+  local total=0
+
+  for item in "${ITENS[@]}"; do
+    local maquina="$CLAUDE_HOME/$item" repo="$DEST/$item"
+
+    # Arquivo solto (CLAUDE.md, settings.json)
+    if [[ -f "$maquina" || -f "$repo" ]]; then
+      if   [[ ! -f "$repo"    ]]; then echo "  +  $item — está na máquina, não está versionado"; total=$((total+1))
+      elif [[ ! -f "$maquina" ]]; then echo "  -  $item — versionado aqui, não está na máquina"; total=$((total+1))
+      elif ! cmp -s "$maquina" "$repo"; then echo "  ~  $item — os dois têm, com conteúdo diferente"; total=$((total+1))
+      fi
+      continue
+    fi
+
+    [[ -d "$maquina" || -d "$repo" ]] || continue
+
+    # Pasta: compara a lista de arquivos dos dois lados, por caminho relativo.
+    # Caminho relativo é o que faz isto funcionar mesmo com espaço no nome da pasta do repositório.
+    local lista_m lista_r
+    lista_m="$(mktemp)"; lista_r="$(mktemp)"
+    [[ -d "$maquina" ]] && (cd "$maquina" && find -L . -type f 2>/dev/null | sed 's|^\./||' | sort) > "$lista_m"
+    [[ -d "$repo"    ]] && (cd "$repo"    && find -L . -type f 2>/dev/null | sed 's|^\./||' | sort) > "$lista_r"
+
+    while IFS= read -r f; do [[ -n "$f" ]] && { echo "  +  $item/$f — apareceu na máquina, não está versionado"; total=$((total+1)); }
+    done < <(comm -23 "$lista_m" "$lista_r")
+
+    while IFS= read -r f; do [[ -n "$f" ]] && { echo "  -  $item/$f — versionado aqui, falta na máquina"; total=$((total+1)); }
+    done < <(comm -13 "$lista_m" "$lista_r")
+
+    while IFS= read -r f; do
+      [[ -n "$f" ]] && ! cmp -s "$maquina/$f" "$repo/$f" && { echo "  ~  $item/$f — os dois têm, com conteúdo diferente"; total=$((total+1)); }
+    done < <(comm -12 "$lista_m" "$lista_r")
+
+    rm -f "$lista_m" "$lista_r"
+  done
+
+  echo
+  if [[ $total -eq 0 ]]; then
+    echo "Tudo igual — máquina e repositório estão sincronizados."
+  else
+    echo "$total diferença(s). O que fazer com cada sinal:"
+    echo "  +  apareceu na máquina  ->  ./backup.sh   para trazer para o repositório"
+    echo "  -  só existe aqui       ->  ./install.sh  para instalar na máquina"
+    echo "  ~  diferentes           ->  veja qual é o mais recente antes de escolher um lado"
+  fi
+}
+
+if [[ "${1:-}" == "--diferencas" ]]; then
+  comparar
+  exit 0
 fi
 
 # Guarda contra o erro mais fácil de cometer aqui: escrever um CLAUDE.md novo no repositório,
