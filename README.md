@@ -84,6 +84,68 @@ As cópias ficam em `backups-locais/`, com data e hora no nome, e não vão para
 
 ---
 
+## Modo permissivo — leia antes de mudar
+
+Este setup roda **liberado**. O Claude Code executa qualquer comando de terminal, cria e apaga qualquer arquivo, acessa a web e usa as integrações (ClickUp, Obsidian) **sem pedir aprovação** — incluindo comando destrutivo: `rm -rf`, `git reset --hard`, `git push`, `supabase db push`.
+
+**Duas exceções**, e só elas, continuam perguntando:
+
+| O quê | Por quê |
+|---|---|
+| `agent-browser` | Clica em interface de verdade, numa sessão logada nas contas reais de Supabase, ClickUp, Google Cloud e banco. |
+| `chrome-devtools` | Abre navegador nas mesmas contas. |
+
+O motivo de serem essas duas: é o único tipo de dano que **nenhuma** das mitigações abaixo consegue desfazer. Um comando errado no terminal deixa rastro e tem ponto de retorno; um clique errado numa tela de produção, não.
+
+A lista `deny` está **vazia** de propósito. Nada é bloqueado.
+
+### O que existe no lugar da aprovação
+
+Três hooks, que **registram e revertem** — nenhum deles bloqueia ou pergunta:
+
+| Hook | O que faz |
+|---|---|
+| `registrar-comandos.mjs` | Grava todo comando executado em `~/.claude/logs/comandos.jsonl`: data, pasta, projeto e o comando completo. Serve para reconstruir o que aconteceu depois. Mascara valor com cara de credencial antes de gravar, e troca de arquivo ao passar de 5 MB. |
+| `avisar-destrutivo.mjs` | Ao detectar comando destrutivo, escreve na tela uma linha dizendo **o que se perde**. Não bloqueia, não pergunta — só mostra passando. |
+| `checkpoint-automatico.mjs` | Antes de operação que reescreve histórico do Git ou toca o banco, guarda o estado atual num ponto de retorno, sem tirar o trabalho de baixo de você. Depois diz como voltar. |
+
+Os três **falham abertos**: se algum quebrar, ele sai calado e o comando roda normalmente. Um hook que trava a sessão seria o único jeito de esse setup te atrapalhar.
+
+**Onde fica o log:** `~/.claude/logs/comandos.jsonl` — uma linha por comando. Para ler o que aconteceu hoje:
+
+```bash
+tail -50 ~/.claude/logs/comandos.jsonl | jq -r '"\(.hora)  \(.projeto)  \(.comando)"'
+```
+
+**Como voltar de um checkpoint:**
+
+```bash
+git stash list                    # os pontos de retorno, do mais recente para o mais antigo
+git stash apply stash@{0}         # traz o estado de volta sem apagar o ponto
+```
+
+### Como adicionar ou tirar uma exceção
+
+Tudo mora em [claude/permissoes.json](claude/permissoes.json), que é escrito para ser lido — cada bloco tem o porquê junto. Depois de editar:
+
+```bash
+./scripts/aplicar-permissoes.sh    # atualiza o settings.json daqui
+./install.sh                       # leva para a máquina (com o Claude Code FECHADO)
+```
+
+- **Passar a perguntar por algo:** acrescente o padrão na lista `ask`. Regra em `ask` vence `allow` sempre, sem depender de ser mais específica — então não precisa mexer no `allow`.
+- **Bloquear de vez:** acrescente na lista `deny`, hoje vazia. `deny` vence tudo, inclusive o `allow` de qualquer projeto.
+- **Servidor MCP novo:** precisa ser nomeado no `allow` (`mcp__nome-do-servidor`). Não existe curinga que pegue todos — se esquecer, ele fica perguntando.
+
+### Duas proteções que continuam de pé
+
+Não são aprovações, e não foram removidas:
+
+- **`secret-scan.mjs` recusa gravar** um arquivo cujo conteúdo tenha cara de senha, chave ou token. É o único hook que barra alguma coisa, e barra porque "nunca commitar segredo" é regra sua. Para desligar, tire a entrada dele de `claude/settings.json`.
+- **Caminhos críticos** — `.git`, `.claude`, `.zshrc`, `.npmrc`, `.mcp.json` — continuam pedindo confirmação para escrita, porque o modo escolhido foi `default` e não `bypassPermissions`. Na prática o dia a dia é igual; a diferença aparece só nesses caminhos.
+
+---
+
 ## Segurança
 
 Nenhuma credencial entra aqui. O `backup.sh` funciona por **lista branca** — só copia os arquivos que estão explicitamente listados nele, então um arquivo novo com token que apareça em `~/.claude/` amanhã não é copiado por acidente. Depois de copiar, ele roda o `checar-segredos.sh`, que procura os formatos conhecidos de chave e **interrompe** se achar algum.
