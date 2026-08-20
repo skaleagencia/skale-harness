@@ -124,6 +124,13 @@
     "Bash(jest*)",
     "Bash(playwright*)",
 
+    "_ Os scripts deste repositório. Uma regra por variação de comando é como se acumularam as",
+    "_ 514 regras anteriores — estas três cobrem o conjunto e param de crescer.",
+    "_ Nenhum deles é destrutivo: o install faz cópia antes e tem --rollback.",
+    "Bash(./install.sh*)",
+    "Bash(./backup.sh*)",
+    "Bash(./scripts/*)",
+
     "_ Ferramentas do meu setup",
     "Bash(graphify *)",
     "Bash(claude mcp list*)",
