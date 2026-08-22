@@ -1,7 +1,7 @@
-# Pendências no skale-insight — esperando o bug fechar
+# Pendências no skale-insight
 
-> Aberto em 2026-08-20. Adiado a pedido do Eric: há correção de bug em andamento naquele projeto.
-> **Nada aqui foi executado.** O projeto está exatamente como estava.
+> Aberto em 2026-08-20. **Os itens 1, 2 e 3 foram executados no mesmo dia** — ver "O que foi feito"
+> no fim. Sobrou uma pendência menor, descrita na seção "O que ainda falta".
 
 Origem: auditoria de consumo com `/cost` mostrou 15% dos tokens indo para o agente genérico
 (`general-purpose`) e 3% para um `database-architect` que não existia. A investigação achou a causa
@@ -82,7 +82,47 @@ E o teste que de fato importa, alguns dias depois:
 
 ---
 
-## Já executado, não refazer
+## O que ainda falta
+
+**O corpo de três agentes locais cita nomes que não existem mais.** O frontmatter foi corrigido,
+mas dentro do texto de `orchestrator.md`, `project-planner.md` e `product-manager.md` ainda há
+referência a `test-engineer`, `security-auditor`, `penetration-tester`, `explorer-agent` e até a
+`mobile-developer` e `game-developer` — que nunca existiram neste projeto.
+
+É conteúdo vindo pronto do kit `ag-kit`, nunca adaptado. Não quebra nada hoje (essas citações estão
+no corpo, não no roteamento), mas é o mesmo tipo de armadilha: um dia alguém segue a instrução e cai
+no agente genérico.
+
+**Decisão pendente sobre o `orchestrator`.** A avaliação confirmou: é template genérico do ag-kit,
+sem uma linha sobre Skale, `company_id`, RLS ou ClickUp. A tabela interna dele lista agentes que
+nunca existiram aqui. O hook global `orchestration-mode.mjs` já faz esse papel em toda sessão de
+todo projeto, e cada subagente custa de 25 a 35 mil tokens só para iniciar.
+
+Recomendação: apagar. Mas é decisão do Eric, e ninguém apagou nada.
+
+---
+
+## O que foi feito
+
+**2026-08-20, na mesma sessão em que foi aberto:**
+
+- Os 6 fantasmas foram trocados pelos globais corretos, nas duas tabelas de roteamento do
+  `CLAUDE.md` — e numa terceira citação, fora das tabelas, na seção de regras de engenharia.
+  Linhas duplicadas foram fundidas (as duas de teste viraram `test-writer`; as duas de segurança
+  viraram `security-reviewer`).
+- Foram acrescentados à tabela os globais que faltavam: `architect`, `migration-specialist`,
+  `explorer` e `doc-updater`, mais quatro linhas de desambiguação para os pares que mais causam
+  roteamento errado.
+- `"model": "opusplan"` removido do `settings.json`. Era ele que fazia o projeto planejar em opus e
+  **executar em sonnet**, enquanto o Eric via `opus[1m]` selecionado e achava que rodava em opus.
+  Configuração de projeto vence a global — e isso não aparece em lugar nenhum da tela.
+- `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` removido do `env`, pelo mesmo motivo: reduzia capacidade
+  só naquele projeto, em silêncio.
+- Os 5 agentes locais passaram a declarar `effort` (`medium`, exceto `project-planner` em `high`).
+  Antes herdavam o nível da sessão, então revisar metadado de SEO gastava como trabalho crítico.
+- Varredura final: zero nomes de agente citados sem arquivo correspondente.
+
+## Já executado antes, não refazer
 
 - **2026-08-19** — 9 agentes locais removidos, 9 promovidos ao global, 35 skills, 9 comandos e
   11 regras genéricas apagadas, 11 hooks removidos e 4 promovidos. O `.claude/` do projeto saiu
