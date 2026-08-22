@@ -94,6 +94,24 @@ instalar_arquivos() {
 
   # Hook não roda sem bit de execução, e o Git nem sempre preserva.
   chmod +x "$CLAUDE_HOME"/hooks/* 2>/dev/null || true
+
+  # Copiar não é suficiente: um agente aposentado aqui continua existindo na máquina, e o
+  # roteamento continua podendo escolhê-lo. Como este script nunca apaga nada por conta própria,
+  # ele mostra o que sobrou e o comando para remover — a decisão fica com quem está lendo.
+  local orfaos=""
+  for item in agents skills hooks commands; do
+    [[ -d "$ORIGEM/$item" && -d "$CLAUDE_HOME/$item" ]] || continue
+    while IFS= read -r f; do
+      [[ -n "$f" && ! -e "$ORIGEM/$item/$f" ]] && orfaos+="  ~/.claude/$item/$f"$'\n'
+    done < <(cd "$CLAUDE_HOME/$item" && find . -maxdepth 1 -mindepth 1 2>/dev/null | sed 's|^\./||')
+  done
+
+  if [[ -n "$orfaos" ]]; then
+    echo
+    amarelo "  Existe na máquina e não no repositório — provavelmente algo aposentado:"
+    printf '%s' "$orfaos"
+    echo "  Se for isso mesmo, remova:  rm -rf <caminho>"
+  fi
 }
 
 # Categoria B: o que não cabe num repositório — plugins baixados de marketplace.

@@ -71,6 +71,50 @@ Categoria A — o `install.sh` copia direto, nada para instalar à parte.
 
 ---
 
+## Especialistas
+
+Arquivos em `claude/agents/`, versionados neste repositório (17). Categoria A — o `install.sh`
+copia cada `.md` direto para `~/.claude/agents/`, nada para instalar à parte. Cada especialista roda
+com um **model** (quanto sabe) e um **effort** (quanto se esforça antes de agir) fixos no próprio
+arquivo — a sessão principal só decide qual acionar, nunca refaz o trabalho pesado sozinha.
+
+| Agente | model | effort | Para quê |
+|---|---|---|---|
+| architect | fable | max | Decisão de arquitetura sem volta fácil — como um produto novo se encaixa no que já existe, ou escolha que vira padrão copiado por meses. Não entra para algo que se desfaz revertendo um commit. |
+| security-reviewer | opus | max | Confere se uma mudança abre brecha de segurança — login, permissão, e principalmente se uma empresa consegue ver dado de outra no mesmo banco. Entra antes de qualquer coisa sensível ir para produção. |
+| database-architect | opus | xhigh | Desenha a estrutura do banco antes de qualquer migração ser escrita — como as tabelas se relacionam, onde entra chave, índice ou a proteção de dado por empresa. |
+| migration-specialist | opus | xhigh | Escreve a migração de banco em si — criar ou alterar tabela, política de proteção por empresa, função, gatilho. Trata toda migração como sem volta, porque os bancos de produção ainda não têm backup. |
+| backend-specialist | opus | high | Regra de negócio e integração — como o dado flui entre serviços, cálculo financeiro, sincronização com Google Ads, Meta Ads ou planilha, e o que fazer quando algo falha no meio do caminho. |
+| debugger | opus | high | Investiga a causa real de um bug ou falha que só acontece às vezes, antes de qualquer conserto — nunca cala o sintoma. |
+| devops-engineer | opus | high | Publica em produção, configura automação de deploy, investiga um problema que já está no ar. |
+| code-reviewer | opus | xhigh | Revisão geral de código pronto — bug, tratamento de erro, teste faltando — e agora também a lente de React (hooks, renderização) e de tipagem/assincronismo, que antes eram de dois revisores à parte. |
+| code-archaeologist | sonnet | high | Investiga um trecho de código antigo e sem explicação para entender por que ele existe, antes de alguém mexer nele. |
+| code-explorer | sonnet | high | Lê e interpreta uma parte do sistema pouco conhecida — o que depende do quê, o que quebra se mudar — para embasar uma decisão de planejamento. |
+| frontend-specialist | sonnet | high | Tela, componente ou fluxo de interface que exige decisão de composição ou experiência de uso — não ajuste pontual de cor ou texto. |
+| performance-optimizer | sonnet | high | Resolve lentidão já medida — tela lenta, consulta cara, função devagar. Nunca otimiza no chute. |
+| documentation-writer | sonnet | medium | Escreve documentação nova e substancial — README, guia de uso, runbook — quando é preciso decidir o que vale a pena explicar, não só copiar. |
+| react-build-resolver | sonnet | medium | Conserta build quebrado de React/Next.js — erro de compilação, configuração do empacotador, tela que não bate entre servidor e navegador. |
+| test-writer | sonnet | medium | Escreve teste para uma função ou fluxo novo, ou para um buraco de cobertura que um bug revelou. |
+| doc-updater | haiku | (sem effort — haiku não suporta) | Atualização mecânica de documentação — sincronizar um texto com o que já mudou no código, sem decisão nova envolvida. |
+| explorer | haiku | (sem effort) | Só localiza — onde fica um arquivo, quem chama uma função, todo uso de algo. Não interpreta, não decide. |
+
+**Duas revisões foram aposentadas em 2026-08-20**: `react-reviewer` e `typescript-reviewer`. O
+conteúdo dos dois foi absorvido pelo `code-reviewer`, que subiu para opus/xhigh — um revisor forte
+cobrindo as duas lentes é mais fácil de manter do que três prompts separados, que envelhecem
+desalinhados entre si.
+
+1. **O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra:
+   um documento de arquitetura pode exigir opus, e um "código" que só renomeia um campo roda em
+   haiku. O que decide é se a tarefa exige **julgamento** ou é **mecânica**.
+2. **`max` só pode ser declarado no arquivo do agente** — o arquivo de configuração da sessão
+   (`settings.json`) aceita no máximo `xhigh`. São dois lugares com regras diferentes, de propósito:
+   `max` não foi feito para ser o padrão do dia inteiro.
+3. **Duas variáveis de ambiente anulam tudo em silêncio:** `CLAUDE_CODE_SUBAGENT_MODEL` e
+   `CLAUDE_CODE_EFFORT_LEVEL`. Se qualquer uma estiver preenchida, o roteamento é ignorado sem dar
+   erro — a de effort vence até o arquivo do agente.
+
+---
+
 ## Hooks
 
 Scripts em `claude/hooks/` que reagem automaticamente a uma ação do Claude Code (não precisam ser
@@ -95,7 +139,7 @@ Categoria B — nenhum cabe no repositório, só a receita de instalar.
 
 | Nome | O que faz | Categoria | Como instalar |
 |---|---|---|---|
-| claude (Claude Code) | O próprio programa que executa tudo isso — sem ele, nada do resto funciona. Versão 2.1.160 hoje. | B | Instalador oficial da Anthropic (ver claude.com/claude-code) |
+| claude (Claude Code) | O próprio programa que executa tudo isso — sem ele, nada do resto funciona. Versão 2.1.237 hoje. | B | Instalador oficial da Anthropic (ver claude.com/claude-code) |
 | graphify | Mapeia o código do projeto como um mapa de dependências — respondo "o que quebra se eu mudar isso" numa consulta em vez de vasculhar arquivo por arquivo. Versão 0.9.46 hoje. | B | Instalador próprio do graphify (ver documentação da ferramenta) |
 | agent-browser | Dá a um agente do Claude Code um navegador de verdade para testar telas e fluxos web como um usuário faria. Versão 0.34.0 hoje. | B | `brew install agent-browser` |
 | gh (GitHub CLI) | Abre e gerencia pull request e repositório do GitHub direto do terminal, sem abrir o site. Versão 2.89.0 hoje. | B | `brew install gh` |

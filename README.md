@@ -230,7 +230,7 @@ autorização antes**, os detalhes estão na seção 7.
 
 | Nome | O que faz | Situação hoje |
 |---|---|---|
-| Claude Code | O programa que executa tudo isso | v2.1.160 — ver ressalva na seção 13 |
+| Claude Code | O programa que executa tudo isso | v2.1.237 — ver ressalva na seção 13 |
 | graphify | Mapeia o código como grafo de dependências | v0.9.46 |
 | agent-browser | Dá a um agente um navegador de verdade para testar | v0.34.0 |
 | gh (GitHub CLI) | Abre e gerencia PR/repositório sem o site | v2.89.0 |
@@ -249,26 +249,37 @@ só o roteamento e a delegação; o trabalho pesado vai para os especialistas.
 | Especialista | model | effort | Para quê |
 |---|---|---|---|
 | `architect` | fable | max | Decisões de arquitetura que não têm volta fácil |
-| `security-reviewer` | opus | xhigh | RLS (isolamento de dado por empresa), OWASP, autenticação |
+| `security-reviewer` | opus | max | RLS (isolamento de dado por empresa), OWASP, autenticação |
+| `database-architect` | opus | xhigh | Desenho do banco antes da migração — tabela, chave, índice, fronteira de RLS |
 | `migration-specialist` | opus | xhigh | Qualquer migração de banco |
 | `backend-specialist` | opus | high | Lógica de negócio, endpoint de API, edge function |
 | `debugger` | opus | high | Causa raiz de bug e comportamento instável |
 | `devops-engineer` | opus | high | Deploy, CI/CD, operação em produção |
-| `frontend-specialist` | sonnet | high | Componente de UI, tela, fluxo de interface |
+| `code-reviewer` | opus | xhigh | Revisão geral de código — agora também as lentes de React e de tipagem |
 | `code-archaeologist` | sonnet | high | Entender código legado sem documentação |
 | `code-explorer` | sonnet | high | Ler e **interpretar** arquitetura antes de decidir |
+| `frontend-specialist` | sonnet | high | Componente de UI, tela, fluxo de interface |
 | `performance-optimizer` | sonnet | high | Gargalo de performance, query lenta, Core Web Vitals |
-| `code-reviewer` | sonnet | medium | Revisão geral de código |
-| `react-reviewer` | sonnet | medium | Revisão com lente de React — hooks, render, Server/Client |
-| `typescript-reviewer` | sonnet | medium | Revisão com lente de tipagem e assincronismo |
+| `documentation-writer` | sonnet | medium | Documentação nova e substancial |
 | `react-build-resolver` | sonnet | medium | Build de React quebrado (Vite, Next, bundler) |
 | `test-writer` | sonnet | medium | Escrever e manter testes |
-| `documentation-writer` | sonnet | medium | Documentação nova e substancial |
 | `doc-updater` | haiku | — | Documentação trivial, sincronizar texto |
 | `explorer` | haiku | — | **Localizar**: buscar, listar, grep — não interpreta |
 
 `explorer` e `code-explorer` não são a mesma coisa: o primeiro **acha** (mecânico, barato); o
 segundo **entende** (julgamento, mais caro). Pedir para achar um arquivo não precisa do segundo.
+
+**Por que um revisor geral forte em vez de três revisores em sonnet.** Até 2026-08-20 existiam
+`react-reviewer` e `typescript-reviewer`, cada um cobrindo uma lente à parte. Os dois foram
+aposentados: o conteúdo virou parte do `code-reviewer`, que subiu de sonnet/medium para opus/xhigh.
+Um revisor forte cobrindo as lentes de React e de TypeScript junto é mais fácil de manter do que
+três prompts separados — três prompts envelhecem desalinhados entre si, um evolui e os outros dois
+ficam para trás sem ninguém notar.
+
+**`security-reviewer` é o único em `max`.** Ele entra raramente — só quando a mudança toca
+autenticação, permissão, RLS ou dado de cliente — e a falha que ele existe para evitar (uma empresa
+lendo o dado de outra, no mesmo banco) é a mais cara possível. `max` custa mais para rodar; vale a
+pena porque a chance de precisar dele é baixa e o custo de errar é alto.
 
 **O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra:
 um documento de arquitetura pode exigir opus, e um "código" que só renomeia um campo roda em
@@ -560,10 +571,11 @@ Documentação que só elogia é propaganda. Isto ainda não foi provado na prá
 - **Duas entradas de configuração no projeto skale-insight** (`hook-guard search` e
   `hook-guard read`, em `.claude/settings.json`) chamam o programa `graphify` pelo caminho fixo
   `/Users/ericsoarese/.local/bin/graphify` — quebram em outro computador.
-- **A versão instalada do Claude Code (2.1.160) é anterior** a várias mudanças da documentação
-  oficial. Em especial: regra de permissão inválida para `Write`/`Glob`/`NotebookEdit` (por
-  exemplo, escrever `Write(**)` em vez do nome nu) falha em **silêncio** nesta versão, sem aviso na
-  tela — é por isso que `claude/permissoes.json` insiste no nome nu para esses três.
+- **Regra de permissão com caminho para `Write`/`Glob`/`NotebookEdit` é aceita, mas nunca
+  consultada** — escrever `Write(**)` em vez do nome nu não filtra nada, porque esses três avaliam
+  pelo nome da ferramenta, não por padrão de caminho. É por isso que `claude/permissoes.json`
+  insiste no nome nu para esses três. O que muda de versão para versão do Claude Code é só se isso
+  gera algum aviso na tela — hoje instalada a v2.1.237, não confirmado se ela avisa.
 - **O Claude Code regrava o `settings.json` inteiro a cada aprovação**, a partir do que tem em
   memória: editar esse arquivo com a sessão aberta é perder a edição sem aviso.
 - **Um comando aprovado vira regra permanente com o texto literal dentro.** Um segredo digitado

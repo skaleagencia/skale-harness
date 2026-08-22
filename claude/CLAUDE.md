@@ -155,26 +155,51 @@ especialistas, que têm effort próprio e sobrescrevem a sessão.
 | Especialista | model | effort | Para quê |
 |---|---|---|---|
 | `architect` | fable | max | Decisões que não se refazem |
-| `security-reviewer` | opus | xhigh | RLS, OWASP, autenticação |
-| `migration-specialist` | opus | xhigh | Migração de banco |
-| `backend-specialist` | opus | high | Lógica de negócio, API |
+| `security-reviewer` | opus | **max** | RLS, OWASP, autenticação, dado de cliente |
+| `code-reviewer` | opus | xhigh | Revisão geral — **o único revisor**, ver abaixo |
+| `database-architect` | opus | xhigh | **Desenha** o schema: tabela, índice, política de RLS |
+| `migration-specialist` | opus | xhigh | **Aplica** a mudança no banco |
+| `backend-specialist` | opus | high | Lógica de negócio, API, edge function |
 | `debugger` | opus | high | Causa raiz de bug e comportamento instável |
 | `devops-engineer` | opus | high | Deploy, CI/CD, operação de produção |
 | `frontend-specialist` | sonnet | high | UI, componente, tela |
 | `code-archaeologist` | sonnet | high | Entender código legado sem documentação |
 | `code-explorer` | sonnet | high | Ler e **interpretar** arquitetura antes de decidir |
 | `performance-optimizer` | sonnet | high | Gargalo de performance, query lenta, Core Web Vitals |
-| `code-reviewer` | sonnet | medium | Revisão geral |
-| `react-reviewer` | sonnet | medium | Revisão com lente de React: hooks, render, Server/Client |
-| `typescript-reviewer` | sonnet | medium | Revisão com lente de tipagem e assincronismo |
 | `react-build-resolver` | sonnet | medium | Build de React quebrado (Vite, Next, bundler) |
 | `test-writer` | sonnet | medium | Testes |
 | `documentation-writer` | sonnet | medium | Documentação nova e substancial |
 | `doc-updater` | haiku | — | Documentação trivial, sincronizar texto |
 | `explorer` | haiku | — | **Localizar**: buscar, listar, grep. Não interpreta |
 
-`explorer` e `code-explorer` não são a mesma coisa: o primeiro **acha** (mecânico, barato); o
-segundo **entende** (julgamento). Pedir para achar um arquivo não precisa do segundo.
+**Três pares que se confundem, e a diferença entre eles:**
+
+- `explorer` **acha** (mecânico, barato); `code-explorer` **entende** (julgamento). Pedir para
+  localizar um arquivo não precisa do segundo.
+- `database-architect` **desenha** o que deve existir no banco; `migration-specialist` **escreve e
+  aplica** a mudança que leva até lá. Desenhar → aplicar → usar (`backend-specialist`).
+- `code-reviewer` cobre bug, erro, teste, convenção, React e tipagem. A **única** revisão que sai
+  dele é segurança, que vai sempre para o `security-reviewer`.
+
+**Só um revisor, e ele é forte.** Havia três (`code-reviewer`, `react-reviewer`,
+`typescript-reviewer`), todos em sonnet. Viraram um em opus/xhigh, em 2026-08-20. Revisão é o
+último filtro antes de produção, e um bug que passa custa muito mais que a diferença de preço da
+revisão — que é uma passada só, não um ciclo. Três prompts separados também envelheciam
+desalinhados entre si.
+
+**`security-reviewer` é o único em `max`** porque entra raramente — só quando a mudança toca login,
+permissão, RLS ou dado de cliente — e a falha que ele previne, uma empresa lendo o dado da outra no
+mesmo banco, é a mais cara possível nestes produtos. O que roda sempre fica em `xhigh`; o que roda
+raro e é irreversível vai para `max`.
+
+**`max` só existe no arquivo do agente.** O `settings.json` aceita no máximo `xhigh` — são dois
+lugares com regras diferentes, de propósito: `max` não foi feito para ser o padrão do dia inteiro.
+
+**Quando existir especialista global e de plugin para o mesmo papel, use o global.** Hoje há três
+`code-reviewer` disponíveis (o global, o do `feature-dev` e o do `pr-review-toolkit`, este em opus)
+e mais de um explorador. Sem essa regra a escolha oscila, e uma revisão de rotina cai num agente
+de plugin sem `effort` declarado. O de plugin só entra quando a skill que o acompanha for acionada
+de propósito — a `revisao-multi-agente`, antes de produção — ou quando ele for pedido pelo nome.
 
 **O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra: um
 documento de arquitetura pode exigir opus, e um "código" que só renomeia campo roda em haiku. O que
