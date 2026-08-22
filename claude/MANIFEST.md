@@ -158,8 +158,8 @@ repositório — só o nome e o comando genérico de registrar cabem aqui.
 
 | Nome | O que faz | Categoria | Como instalar |
 |---|---|---|---|
-| claude.ai Algrow | Acesso à base de inteligência de canais do YouTube — pesquisa, métricas de crescimento, geração de miniatura e roteiro. | B | `claude mcp add --scope user algrow` (autorizar depois via claude.ai) |
-| claude.ai ClickUp | Cria e consulta tarefa, comentário e documento no ClickUp direto da conversa, sem abrir o quadro. | B | `claude mcp add --scope user clickup` (autorizar depois via claude.ai) |
+| claude.ai Algrow | Acesso à base de inteligência de canais do YouTube — pesquisa, métricas de crescimento, geração de miniatura e roteiro. | B | Conector de CONTA: liga nas configurações do claude.ai. Em máquina nova, vem junto com o login — não use `claude mcp add`. |
+| claude.ai ClickUp | Cria e consulta tarefa, comentário e documento no ClickUp direto da conversa, sem abrir o quadro. É por ele que as skills `/clickup*` funcionam. | B | Conector de CONTA: liga nas configurações do claude.ai. Em máquina nova, vem junto com o login — não use `claude mcp add`. |
 | context7 | Busca a documentação atual de uma biblioteca ou framework antes de eu usar ela — evita eu recomendar uma versão antiga de cabeça. | B | `claude mcp add --scope user context7` |
 | chrome-devtools | Controla um Chrome de verdade para inspecionar e testar uma página — rede, console, performance. | B | `claude mcp add --scope user chrome-devtools` |
 | obsidian | Lê e escreve nota no cofre de anotações do Eric (`~/ObsidianVault-Skale`) — memória de projeto que vive fora do código. | B | `claude mcp add --scope user obsidian` (aponta para o vault local) |
@@ -178,6 +178,12 @@ até alguém decidir aplicar num projeto.
 | Nome | O que faz | Categoria | Como usar |
 |---|---|---|---|
 | [backup-supabase](../templates/backup-supabase/) | Rotina diária que copia o banco do Supabase para fora dele, criptografada, guardada no Cloudflare R2. Existe porque o plano Free não faz backup nenhum, o Pro guarda só 7 dias, e arquivo de Storage não é coberto em plano nenhum. | A | copiar para o projeto e cadastrar os secrets — ver o [README do template](../templates/backup-supabase/README.md) |
+
+> **Dois tipos de MCP, e a diferença importa em máquina nova.** Os que começam com `claude.ai` são
+> **conectores da conta**: a credencial mora na sua conta do claude.ai, e o Claude Code os enxerga
+> através do login. Fazer login numa máquina nova já traz todos eles — `claude mcp add` não é o
+> caminho e não funciona para esses. Os demais rodam **nesta máquina**, com credencial local, e aí
+> sim precisam do comando da coluna ao lado.
 
 ## O que o Git não traz de volta
 

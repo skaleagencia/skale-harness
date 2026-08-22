@@ -204,9 +204,9 @@ verificar() {
       echo "  ok  MCP $servidor"
     else
       case "$servidor" in
-        clickup)  falta "MCP do ClickUp não configurado" \
-                        "Sem ele as skills /executar-tarefa e /planejar não funcionam em nenhum projeto." \
-                        "claude mcp add --scope user clickup" ;;
+        clickup)  falta "Conector do ClickUp não encontrado" \
+                        "Sem ele as skills /clickup, /clickup-executar e /clickup-fila não funcionam em projeto nenhum." \
+                        "é conector de CONTA, não se instala por comando — ligue nas configurações do claude.ai e faça login aqui" ;;
         obsidian) falta "MCP do Obsidian não configurado" \
                         "Sem ele o Mapa do Repositório não é gravado no vault, só no ClickUp." \
                         "claude mcp add --scope user obsidian" ;;

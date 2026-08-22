@@ -51,10 +51,19 @@ brew install agent-browser    # controla um navegador de verdade, para testar in
 
 MCP é a ponte entre o Claude e um serviço de fora (ClickUp, Obsidian, documentação). Cada um precisa da sua credencial, então nenhum vem no repositório.
 
+São de dois tipos, e se configuram de formas diferentes:
+
+**Os que vêm da sua conta** — ClickUp, Google Drive, Algrow. Não se instalam por comando: são
+conectores ligados na sua conta do claude.ai, e o Claude Code enxerga através do login. Em máquina
+nova, **fazer login já traz os três**. Para ligar ou desligar algum, é nas configurações de
+conectores do claude.ai, não aqui.
+
+**Os que rodam nesta máquina** — precisam ser adicionados:
+
 ```bash
-claude mcp add --scope user clickup
-claude mcp add --scope user obsidian
 claude mcp add --scope user context7
+claude mcp add --scope user chrome-devtools
+claude mcp add --scope user obsidian    # aponta para o vault: veja o passo 5
 ```
 
 Conferir: `claude mcp list`
