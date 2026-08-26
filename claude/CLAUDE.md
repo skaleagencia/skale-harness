@@ -137,23 +137,28 @@ contexto; se não tiver e o projeto tem interface, ofereça criar.
 
 **Regra do navegador — o alvo decide, não a ferramenta.**
 
-O `chrome-devtools` está liberado, inclusive para rodar JavaScript na página. A liberação se apoia
-numa condição: **o alvo é ambiente local.** Contra `localhost`, o pior caso de um script mal escrito
-fica dentro desta máquina — nenhum cliente envolvido, nada irreversível.
+`chrome-devtools` e `agent-browser` estão liberados: inspecionar, rodar JavaScript na página, e
+clicar e digitar em interface de verdade. A liberação se apoia numa condição: **o alvo é ambiente
+local.** Contra `localhost`, o pior caso fica dentro desta máquina — nenhum cliente envolvido.
 
 - **Local** (`localhost`, `127.0.0.1`, `*.local`, porta de desenvolvimento): usar à vontade.
-  Screenshot, console, rede, medir contraste, inspecionar elemento, testar fluxo.
-- **Qualquer outro endereço** — produção, homologação, painel do Supabase, ClickUp, Google Cloud:
-  **PARAR e pedir autorização**, explicando em uma linha o que vai fazer e por quê. Ali o navegador
-  está logado nas contas reais, e um clique ou script tem consequência imediata.
+- **Qualquer outro endereço** — produção, homologação, painel do Supabase, ClickUp, Google Cloud,
+  Meta: **PARAR e pedir autorização**, explicando em uma linha o que vai fazer e por quê. Ali o
+  navegador está logado nas contas reais, e um clique tem consequência imediata.
 - **Não há servidor de desenvolvimento rodando?** Perguntar antes de subir um, em vez de apontar
-  para produção por falta de alternativa.
+  para produção por falta de alternativa. Esta é a linha que mais importa: sem ela, o caminho fácil
+  num dia corrido é mirar produção "só para ver rápido".
 
-Isto é regra de conduta, não trava técnica: a permissão não sabe distinguir endereço. É por isso
-que está escrita aqui — e é por isso que apontar o navegador para produção sem pedir seria quebrar
-o acordo que sustenta a liberação inteira.
+Isto é conduta, não trava técnica: a permissão libera a ferramenta e não sabe distinguir endereço.
+É por isso que está escrita aqui — e é por isso que apontar o navegador para produção sem pedir
+quebra o acordo que sustenta a liberação inteira.
 
-O `agent-browser` continua pedindo autorização sempre, em qualquer endereço.
+**O que o teste local NÃO cobre**, e onde é legítimo pedir para ir a produção: fluxo que depende de
+o provedor chamar de volta um endereço público — OAuth do Google Ads e da Meta, webhook do
+WhatsApp. `localhost` não existe para eles, a menos que esteja registrado como retorno autorizado
+no painel de cada um. Também não cobrem: volume e caso de borda de dado real, edge function do
+Supabase sem `supabase functions serve`, isolamento entre empresas com usuários reais, e latência
+de verdade.
 
 **Transparência.** Ao acionar uma ferramenta, diga em **uma linha** o que está usando e por quê. Ao
 delegar, diga qual especialista, qual **model** e qual **effort** — é como ele percebe se algo rodou

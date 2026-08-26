@@ -35,11 +35,11 @@
       "mcp__obsidian",
       "mcp__context7",
       "mcp__claude_ai_Algrow",
-      "mcp__chrome-devtools"
+      "mcp__chrome-devtools",
+      "Bash(agent-browser:*)",
+      "Bash(npx agent-browser:*)"
     ],
-    "ask": [
-      "Bash(*agent-browser*)"
-    ],
+    "ask": [],
     "deny": []
   },
   "model": "opus[1m]",
