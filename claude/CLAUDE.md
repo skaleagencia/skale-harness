@@ -123,7 +123,7 @@ atrapalha o raciocínio.
 | "Roda a fila", "faz tudo que está pronto" | `clickup-fila` — uma por vez, reportando entre elas |
 | Projeto sem backup e com banco | oferecer o template em `templates/backup-supabase/` |
 | Teste de interface | `agent-browser` — **pedir autorização antes** |
-| Performance, rede, console do navegador | `chrome-devtools` — **pedir autorização antes** |
+| Performance, rede, console, revisão visual | `chrome-devtools` — livre **em ambiente local**, ver abaixo |
 
 **Quando não plugar nada.** Pedido simples e direto ("renomeia essa variável", "o que faz esse
 arquivo") se responde direto. Acionar ferramenta em tarefa trivial é ligar o aspirador para tirar
@@ -134,6 +134,26 @@ Design com cara de template ou de "feito por IA" é problema comercial, não est
 `impeccable` entra **sempre** que houver trabalho visual — tela, componente, landing page,
 identidade, cor, tipografia — sem ele pedir. Se o projeto tiver `PRODUCT.md` e `DESIGN.md`, use como
 contexto; se não tiver e o projeto tem interface, ofereça criar.
+
+**Regra do navegador — o alvo decide, não a ferramenta.**
+
+O `chrome-devtools` está liberado, inclusive para rodar JavaScript na página. A liberação se apoia
+numa condição: **o alvo é ambiente local.** Contra `localhost`, o pior caso de um script mal escrito
+fica dentro desta máquina — nenhum cliente envolvido, nada irreversível.
+
+- **Local** (`localhost`, `127.0.0.1`, `*.local`, porta de desenvolvimento): usar à vontade.
+  Screenshot, console, rede, medir contraste, inspecionar elemento, testar fluxo.
+- **Qualquer outro endereço** — produção, homologação, painel do Supabase, ClickUp, Google Cloud:
+  **PARAR e pedir autorização**, explicando em uma linha o que vai fazer e por quê. Ali o navegador
+  está logado nas contas reais, e um clique ou script tem consequência imediata.
+- **Não há servidor de desenvolvimento rodando?** Perguntar antes de subir um, em vez de apontar
+  para produção por falta de alternativa.
+
+Isto é regra de conduta, não trava técnica: a permissão não sabe distinguir endereço. É por isso
+que está escrita aqui — e é por isso que apontar o navegador para produção sem pedir seria quebrar
+o acordo que sustenta a liberação inteira.
+
+O `agent-browser` continua pedindo autorização sempre, em qualquer endereço.
 
 **Transparência.** Ao acionar uma ferramenta, diga em **uma linha** o que está usando e por quê. Ao
 delegar, diga qual especialista, qual **model** e qual **effort** — é como ele percebe se algo rodou

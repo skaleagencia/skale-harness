@@ -65,7 +65,15 @@
     "mcp__claude_ai_ClickUp",
     "mcp__obsidian",
     "mcp__context7",
-    "mcp__claude_ai_Algrow"
+    "mcp__claude_ai_Algrow",
+
+    "_ Navegador de inspeção, liberado em 2026-08-25. Inclui rodar JavaScript na página.",
+    "_ A decisão se apoia numa regra que a permissão NÃO consegue impor sozinha: testar sempre",
+    "_ contra ambiente local, onde o pior caso fica dentro desta máquina. A regra está escrita",
+    "_ na seção 4 do CLAUDE.md — é orientação, não trava. Produção continua exigindo",
+    "_ autorização explícita, e é responsabilidade minha parar e pedir antes de apontar",
+    "_ o navegador para um endereço que não seja local.",
+    "mcp__chrome-devtools"
   ],
 
   "ask": [
@@ -76,9 +84,11 @@
     "_ O curinga nos dois lados é proposital: pega 'agent-browser' sozinho, com argumentos,",
     "_ chamado por npx, chamado pelo caminho completo, e com variável de ambiente na frente.",
     "_ Um padrão só com prefixo deixaria todas essas formas passarem direto.",
-    "Bash(*agent-browser*)",
-
-    "mcp__chrome-devtools__*"
+    "_ O agent-browser continua aqui, mas o chrome-devtools saiu em 2026-08-25 (ver o bloco dele",
+    "_ em allow). A diferença: o chrome-devtools é usado para inspecionar durante o trabalho, e o",
+    "_ alvo combinado é sempre ambiente local; o agent-browser existe para percorrer fluxo em",
+    "_ interface real, que na prática costuma ser a de produção.",
+    "Bash(*agent-browser*)"
   ],
 
   "deny": []

@@ -34,11 +34,11 @@
       "mcp__claude_ai_ClickUp",
       "mcp__obsidian",
       "mcp__context7",
-      "mcp__claude_ai_Algrow"
+      "mcp__claude_ai_Algrow",
+      "mcp__chrome-devtools"
     ],
     "ask": [
-      "Bash(*agent-browser*)",
-      "mcp__chrome-devtools__*"
+      "Bash(*agent-browser*)"
     ],
     "deny": []
   },
