@@ -98,6 +98,18 @@ arquivo — a sessão principal só decide qual acionar, nunca refaz o trabalho 
 | doc-updater | haiku | (sem effort — haiku não suporta) | Atualização mecânica de documentação — sincronizar um texto com o que já mudou no código, sem decisão nova envolvida. |
 | explorer | haiku | (sem effort) | Só localiza — onde fica um arquivo, quem chama uma função, todo uso de algo. Não interpreta, não decide. |
 
+**Agentes locais do skale-insight** — vivem em `.claude/agents/` daquele projeto, não neste
+repositório. Não são instalados pelo `install.sh`; se o projeto mudar de máquina, precisam ser
+copiados à parte.
+
+| Agente | model | effort | Para quê |
+|---|---|---|---|
+| orchestrator | sonnet | medium | Coordena uma tarefa que atravessa vários domínios, delegando para os especialistas certos em vez de um agente genérico tentar tudo sozinho. |
+| product-manager | sonnet | medium | Esclarece um pedido ambíguo e prioriza o que entra no roadmap, antes de existir uma tarefa definida. |
+| product-owner | sonnet | medium | Traduz um objetivo de negócio em especificação técnica e define o critério de aceite de uma tarefa antes de começar a implementar. |
+| project-planner | sonnet | high | Quebra uma funcionalidade ou fase grande em tarefas menores e ordenadas, cada uma com critério de aceite, antes de começar a codar. |
+| seo-specialist | sonnet | medium | Cuida de como o produto aparece em buscador tradicional e em busca por IA — metadado, dado estruturado, capacidade de ser rastreado. |
+
 **Duas revisões foram aposentadas em 2026-08-20**: `react-reviewer` e `typescript-reviewer`. O
 conteúdo dos dois foi absorvido pelo `code-reviewer`, que subiu para opus/xhigh — um revisor forte
 cobrindo as duas lentes é mais fácil de manter do que três prompts separados, que envelhecem
@@ -210,6 +222,69 @@ mas os itens abaixo **não estão em nenhum lugar do Git** e precisam ser refeit
 - **Vercel sem autorização** — MCP conectado mas inativo; autorizar via `claude mcp` ou `/mcp`.
 - **MCP do ClickUp usado pelas skills do projeto** — falta configurar; é necessário para o fluxo de
   trabalho atual.
+
+---
+
+## Histórico de correções
+
+**2026-08-22 — 18% do consumo ia para o agente genérico**
+
+Problema: uma auditoria com `/cost` no skale-insight mostrou 15% dos tokens indo para
+`general-purpose` (o agente sem especialidade) e 3% para um `database-architect` que não tinha
+arquivo de definição.
+
+Causa raiz, duas coisas somadas:
+1. Seis nomes de agente eram citados no `CLAUDE.md` do projeto sem ter arquivo correspondente — em
+   três lugares: duas tabelas de roteamento e uma citação em texto corrido. Nome sem arquivo cai no
+   genérico, sem prompt especializado e sem model nem effort forçados.
+2. O `settings.json` do projeto trazia `"model": "opusplan"` — modo híbrido que planeja em opus e
+   executa em sonnet. Configuração de projeto vence a global, então a sessão ignorava o `opus[1m]`
+   selecionado na interface. Também havia `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING`, desligando o
+   raciocínio adaptativo só naquele projeto.
+
+Correção: os 6 fantasmas trocados pelos globais corretos nos três lugares; 4 globais que faltavam
+acrescentados à tabela (`architect`, `migration-specialist`, `explorer`, `doc-updater`); `opusplan`
+e `DISABLE_ADAPTIVE_THINKING` removidos; os 5 agentes locais passaram a declarar `effort`. Varredura
+final: zero nomes de agente sem arquivo.
+
+Resultado medido com `/cost` em 25/08:
+- `general-purpose`: 15% para 0%
+- `database-architect` fantasma: 3% para 0%
+- Os 18% foram redistribuídos para especializados: `backend-specialist` 28%, `debugger` 14%,
+  `devops-engineer` 6%, `code-reviewer` 3%, `explorer` 1%
+
+---
+
+## Aprendizados que valem para sempre
+
+1. **Configuração de projeto vence a global, e não aparece na tela.**
+   O `model` declarado no `settings.json` de um projeto tem precedência sobre a seleção global e
+   sobre o que está selecionado na interface. O efeito é invisível no painel de agentes, porque cada
+   subagente declara o próprio model no frontmatter e continua rodando certo — só a sessão principal
+   cai. Consequência prática: **ao auditar consumo, conferir o `settings.json` do projeto ANTES de
+   qualquer outra hipótese.** Os três lugares onde um projeto sobrescreve em silêncio são `model`,
+   `env` e `permissions`.
+
+2. **Nome de agente citado sem arquivo vaza token em silêncio.**
+   Todo nome de agente citado em `CLAUDE.md`, numa skill, num comando ou no corpo de outro agente
+   precisa ter arquivo de definição correspondente — global (`~/.claude/agents/`) ou do projeto
+   (`.claude/agents/`). Nome sem arquivo cai no `general-purpose`: roda sem prompt especializado, sem
+   model e sem effort, custa mais e entrega pior. Não dá erro, não avisa. Regra derivada: **antes de
+   apagar um arquivo de agente, procurar quem o referencia** — não basta confirmar que o conteúdo é
+   redundante.
+
+---
+
+## Pendências com data
+
+**29/08/2026 — medir o harness corrigido com amostra maior**
+
+Rodar: `npx ccusage blocks --since 20260822 --breakdown`
+
+Objetivo: 12 a 15 blocos limpos, para comparar com confiança.
+Baselines: 19,9 milhões de tokens por hora ativa no período pré-harness (1 a 17/08); 17,8 milhões
+por hora ativa na primeira medição pós-correção (22 a 25/08), com apenas 4 blocos — amostra pequena
+demais para conclusão.
 
 ---
 

@@ -33,6 +33,33 @@ O problema não é citar código — é usar **nome interno como se fosse portug
 
 Vale para tudo que ele lê: explicação, relatório, resumo de commit, aviso de erro na tela.
 
+### Dois públicos, dois registros — não confundir
+
+| | Briefing para especialista | Relatório para o Eric |
+|---|---|---|
+| Quem lê | Outro agente | Ele |
+| Como escrever | Técnico e **completo**: caminhos, evidência, armadilhas, o que não tocar | Curto, no efeito, sem jargão |
+| Por quê | Subagente não herda nada da conversa. Briefing incompleto faz ele reinvestigar do zero e errar o alvo | Ele decide sobre o produto, não sobre o código |
+
+Briefing longo é correto e não precisa caber na tela — ele não é para o Eric ler. **Relatório longo é
+erro**, mesmo quando cada linha está certa.
+
+### Tamanho do relatório: curto por padrão
+
+Ao terminar uma tarefa, **5 a 8 linhas**, nesta ordem:
+
+1. O que mudou, pelo efeito no produto
+2. O que precisa da atenção dele — se houver
+3. O próximo passo, se existir
+
+O detalhe fica no commit, nos arquivos e no histórico. **Se ele quiser mais, ele pede.** Tabela,
+seção e evidência entram quando ele pede, quando a decisão é dele, ou quando existe risco que ele
+precisa ver antes de aprovar.
+
+Comprimir palavra não é o mesmo que dizer menos. *"Token expira cedo, comparação usa `<` e não
+`<=`"* é curto e continua exigindo tradução; *"o login caía um minuto antes da hora, corrigido"* é
+mais longo e muito mais fácil. **Encurte o escopo, não as frases.**
+
 ---
 
 ## 2. Regras invioláveis
