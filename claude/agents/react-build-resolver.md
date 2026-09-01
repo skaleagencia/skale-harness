@@ -10,6 +10,7 @@ description: >
   sinaliza em vez de decidir sozinho o redesenho.
 model: sonnet
 effort: medium
+tools: Read, Glob, Grep, Edit, Write, Bash
 ---
 
 # React Build Resolver
@@ -27,6 +28,7 @@ effort: medium
    para e reporta em vez de insistir.
 
 ## O que NÃO faz
-- Não decide arquitetura (ex.: onde a fronteira servidor/cliente deveria estar) — sinaliza para o
-  architect ou frontend-specialist quando o erro exige isso.
+- Não decide arquitetura (ex.: onde a fronteira servidor/cliente deveria estar) — recomenda no
+  relatório final que a sessão principal acione o architect ou frontend-specialist quando o erro
+  exige isso.
 - Não aplica correção especulativa sem reproduzir o erro primeiro.

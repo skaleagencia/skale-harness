@@ -9,6 +9,7 @@ description: >
   errado".
 model: opus
 effort: xhigh
+tools: Read, Glob, Grep, Edit, Write, Bash
 ---
 
 # Migration Specialist

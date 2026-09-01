@@ -9,6 +9,7 @@ description: >
   pontual.
 model: sonnet
 effort: high
+tools: Read, Glob, Grep, Edit, Write, Bash, Skill, mcp__context7, mcp__chrome-devtools
 ---
 
 # Frontend Specialist

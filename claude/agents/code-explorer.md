@@ -11,6 +11,7 @@ description: >
   ou não.
 model: sonnet
 effort: high
+tools: Read, Glob, Grep
 ---
 
 # Code Explorer

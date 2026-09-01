@@ -8,6 +8,7 @@ description: >
   ainda não entendido — isso é o architect ou o especialista que fez a mudança relatando ele
   mesmo.
 model: haiku
+tools: Read, Glob, Grep, Edit
 ---
 
 # Doc Updater

@@ -10,6 +10,7 @@ description: >
   documentar — julgamento sobre o que o leitor precisa saber, não só transcrição.
 model: sonnet
 effort: medium
+tools: Read, Glob, Grep, Edit, Write
 ---
 
 # Documentation Writer

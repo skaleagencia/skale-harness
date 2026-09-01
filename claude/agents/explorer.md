@@ -9,6 +9,7 @@ description: >
   julgamento — interpretar arquitetura, padrão ou dependência para embasar uma decisão — use
   code-explorer, não este agente.
 model: haiku
+tools: Read, Glob, Grep
 ---
 
 # Explorer

@@ -14,6 +14,7 @@ description: >
   ficou pronto.
 model: opus
 effort: xhigh
+tools: Read, Glob, Grep
 ---
 
 # Database Architect

@@ -7,6 +7,7 @@ description: >
   replicar a implementação linha a linha.
 model: sonnet
 effort: medium
+tools: Read, Glob, Grep, Edit, Write, Bash
 ---
 
 # Test Writer

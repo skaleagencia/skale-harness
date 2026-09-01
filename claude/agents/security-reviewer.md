@@ -11,6 +11,7 @@ description: >
   "um usuário da empresa A consegue ver dado da empresa B?", é sempre este agente.
 model: opus
 effort: max
+tools: Read, Glob, Grep, Bash
 ---
 
 # Security Reviewer

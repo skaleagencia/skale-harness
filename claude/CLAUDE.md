@@ -247,11 +247,51 @@ raro e é irreversível vai para `max`.
 **`max` só existe no arquivo do agente.** O `settings.json` aceita no máximo `xhigh` — são dois
 lugares com regras diferentes, de propósito: `max` não foi feito para ser o padrão do dia inteiro.
 
-**Quando existir especialista global e de plugin para o mesmo papel, use o global.** Hoje há três
-`code-reviewer` disponíveis (o global, o do `feature-dev` e o do `pr-review-toolkit`, este em opus)
-e mais de um explorador. Sem essa regra a escolha oscila, e uma revisão de rotina cai num agente
-de plugin sem `effort` declarado. O de plugin só entra quando a skill que o acompanha for acionada
-de propósito — a `revisao-multi-agente`, antes de produção — ou quando ele for pedido pelo nome.
+**Quando existir especialista global e de plugin para o mesmo papel, use o global.** O de plugin não
+declara `effort`, então herda o da sessão e muda de tier sem avisar. Só entre nele quando for pedido
+pelo nome.
+
+---
+
+## Quando NÃO delegar
+
+Cada despacho de especialista custa, medido nesta máquina, **~4 milhões de tokens em média** — não os
+25 a 35 mil da inicialização. O custo não está em despachar; está no que o agente faz lá dentro, com
+o contexto inteiro carregado. Por isso o critério mudou de "delegue sempre que houver especialista"
+para o que está abaixo.
+
+**Resolva direto, sem especialista:** ler e explicar arquivo, renomear, ajustar texto ou constante,
+rodar comando e reportar, responder pergunta sobre o código. Delegar isso gasta milhões de tokens
+para poupar segundos.
+
+**Um agente por PROBLEMA, não por sintoma.** Tela em branco, dado zerado e sincronização parada
+costumam ser o mesmo defeito visto de três lugares. Antes de abrir o segundo despacho sobre o mesmo
+assunto, pergunte se não é o mesmo problema — se for, é um escopo só. Caso real: quatro `debugger`
+para um bug de sincronização, cada um reconstruindo o contexto do zero.
+
+**Investigar e corrigir vão no mesmo despacho.** Separar faz o segundo agente reaprender tudo que o
+primeiro descobriu. Só separe quando a correção depender de uma decisão sua no meio.
+
+**Revisão roda UMA vez, no fim.** Achou problema? Quem corrige valida a própria correção e reporta o
+que fez. Segunda revisão completa só se a correção tocar mais de um arquivo ou mudar comportamento.
+
+**`security-reviewer` (opus/max) entra quando a mudança toca** login, permissão, RLS, `company_id`,
+dado de cliente, credencial, ou rota exposta publicamente. **Não entra** em bug de sincronização de
+API, erro de renderização, ajuste de cálculo ou correção de build. Lógica de fallback de credencial
+entra — usar o token de uma empresa no contexto de outra é a falha mais cara destes produtos.
+
+**`migration-specialist` entra quando há DDL** — criar ou alterar tabela, índice, política. Não entra
+para ler dado nem para ajustar consulta.
+
+**Teto de 5 despachos por tarefa.** Ao chegar no quinto, pare e diga em uma linha por que o sexto é
+necessário. Se não souber explicar, ele não é.
+
+**Do segundo despacho em diante, anuncie antes:** qual especialista, com que model e effort, e por
+que este trabalho não cabe no despacho anterior.
+
+**Especialista não despacha especialista.** Nenhum dos 17 tem a ferramenta de despacho no
+frontmatter, de propósito. Se um relatório recomendar acionar outro agente, quem despacha é a sessão
+principal.
 
 **O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra: um
 documento de arquitetura pode exigir opus, e um "código" que só renomeia campo roda em haiku. O que

@@ -10,6 +10,7 @@ description: >
   histórica antes de ser tocado com segurança.
 model: sonnet
 effort: high
+tools: Read, Glob, Grep, Bash
 ---
 
 # Code Archaeologist
