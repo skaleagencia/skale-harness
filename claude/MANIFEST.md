@@ -15,7 +15,7 @@ de instalar cabe, e está na coluna "Como instalar".
 
 ## Plugins
 
-Habilitados hoje em `~/.claude/settings.json` (17). Cada um vem de um marketplace — uma espécie de
+Habilitados hoje em `~/.claude/settings.json` (14). Cada um vem de um marketplace — uma espécie de
 loja de plugins que o Claude Code sabe consultar; os 7 marketplaces conhecidos nesta máquina estão
 listados depois da tabela.
 
@@ -26,18 +26,21 @@ listados depois da tabela.
 | claude-academy-guide | Guia de referência sobre o próprio Claude Code — como usar hooks, comandos, MCP — para eu explicar a ferramenta em vez de adivinhar. | B | `/plugin install claude-academy-guide@anthropic-agent-skills` |
 | claude-code-setup | Analisa um projeto e recomenda quais automações do Claude Code (hooks, agentes, skills) valem a pena montar nele. | B | `/plugin install claude-code-setup@claude-plugins-official` |
 | claude-md-management | Audita e atualiza o arquivo de instruções (CLAUDE.md) de um projeto, apontando o que está desatualizado ou fraco. | B | `/plugin install claude-md-management@claude-plugins-official` |
-| code-review | Revisa um pull request inteiro, apontando bug e ponto fraco antes de eu aprovar. | B | `/plugin install code-review@claude-plugins-official` |
 | commit-commands | Atalhos prontos para criar commit, subir e abrir pull request sem eu descrever o processo toda vez. | B | `/plugin install commit-commands@claude-plugins-official` |
 | discernment-nudge | Me lembra de parar e confirmar antes de agir quando o pedido é ambíguo, em vez de sair executando a primeira interpretação. | B | `/plugin install discernment-nudge@anthropic-agent-skills` |
 | document-skills | Cria e edita arquivo do Office (Word, Excel, PowerPoint) e PDF direto, sem precisar de outro programa aberto. | B | `/plugin install document-skills@anthropic-agent-skills` |
 | example-skills | Pacote de exemplos prontos (design de marca, arte, comunicação interna) que eu posso usar de modelo em vez de começar do zero. | B | `/plugin install example-skills@anthropic-agent-skills` |
-| feature-dev | Guia o desenvolvimento de uma funcionalidade nova do início ao fim — entender o código existente antes de escrever o novo. | B | `/plugin install feature-dev@claude-plugins-official` |
 | hookify | Cria automações (hooks) a partir de "sempre que X acontecer, faça Y" — sem eu escrever o script de automação na mão. | B | `/plugin install hookify@claude-plugins-official` |
 | ponytail | Mantém meu código enxuto — questiona código desnecessário antes de escrever, prefere a solução mais simples que funciona. | B | `/plugin install ponytail@ponytail` |
-| pr-review-toolkit | Kit de revisores especializados (teste, erro silencioso, design de tipo) que analisam um pull request cada um pela sua lente. | B | `/plugin install pr-review-toolkit@claude-plugins-official` |
 | superpowers | Coleção de métodos de trabalho (planejar antes de codar, revisão antes de terminar, depuração sistemática) que me fazem seguir processo em vez de atalho. | B | `/plugin install superpowers@claude-plugins-official` |
 | ui-ux-pro-max | Kit de design de interface — marca, sistema de design, apresentação — para telas e materiais visuais mais consistentes. | B | `/plugin install ui-ux-pro-max@ui-ux-pro-max-skill` |
 | vercel | Conecta o Claude Code à Vercel — deploy, variáveis de ambiente, Next.js — para projetos hospedados lá. | B | `/plugin install vercel@claude-plugins-official` |
+
+**Desinstalados em 2026-09-01** — `pr-review-toolkit`, `feature-dev` e `code-review`. Os dois
+últimos despachavam de 6 a 10 subagentes por invocação, sempre os do próprio plugin, ignorando o
+elenco global; com o custo medido de cerca de 4 milhões de tokens por despacho, uma chamada só
+saía por dezenas de milhões. A única capacidade que se perdia — a caça a falha silenciosa do
+`silent-failure-hunter` — foi absorvida pelo `code-reviewer` global.
 
 **Instalado mas não habilitado no perfil global:** `watch@claude-video` — fica de fora até eu decidir ligá-lo. Para habilitar: `/plugin` e marcar `watch` na lista.
 
@@ -139,7 +142,7 @@ chamados por mim). Categoria A.
 | orchestration-mode.mjs | A cada mensagem minha, ativa no Claude Code o modo "chefe de equipe": ele delega para agentes especialistas em vez de tentar fazer tudo sozinho na mesma conversa. | A | `./install.sh` (copia `claude/hooks/orchestration-mode.mjs`) |
 | bootstrap-projeto.mjs | Ao abrir um projeto pela primeira vez, lista o que falta ali (mapa do código, CLAUDE.md, regras, integrações) explicando para que serve cada coisa, e **oferece** criar. Nunca executa sozinho, pergunta uma vez só e nunca mais. | A | `./install.sh` |
 | secret-scan.mjs | Antes de gravar qualquer arquivo, recusa a escrita se o conteúdo tiver cara de senha, chave ou token. É o único que bloqueia de verdade — e bloqueia de propósito. | A | `./install.sh` |
-| guard-main-branch.mjs | Antes de um commit ou envio direto na branch principal, pede confirmação. Branch de trabalho passa direto. | A | `./install.sh` |
+| guard-main-branch.mjs | Antes de um commit ou envio direto na branch principal, pede confirmação. Branch de trabalho passa direto. **Está no disco mas NÃO registrado no settings.json — hoje não dispara.** Foi desregistrado em 2026-08-25, quando o modo permissivo entrou: ele pedia confirmação, que é justamente o que a política nova dispensa. O aviso de comando destrutivo cobre o caso sem interromper. | A | `./install.sh` |
 | validate-settings-schema.mjs | Depois de editar um arquivo de configuração do Claude Code, avisa se ele ficou com formato inválido — antes de você descobrir na próxima sessão, quando nada carrega. | A | `./install.sh` |
 | large-file-warning.mjs | Avisa quando um arquivo passa de ~350 linhas, sugerindo dividir. Só avisa. | A | `./install.sh` |
 

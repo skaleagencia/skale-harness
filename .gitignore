@@ -34,3 +34,7 @@ backups-locais/
 .DS_Store
 node_modules/
 *.log
+
+# Panorama do setup: levantamento local, nunca publicado.
+# Lista caminho da máquina, plugins, MCPs e consumo — mapa de reconhecimento do ambiente.
+PANORAMA.md

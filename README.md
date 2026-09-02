@@ -113,8 +113,8 @@ contexto (a "memória de trabalho" da conversa), deixa mais lento e atrapalha o 
 | Projeto novo | `aia-harness:init` + `memoria-do-projeto` |
 | Documentar decisão ou aprendizado | Obsidian (via MCP) |
 | Tarefa de desenvolvimento | ClickUp (via MCP) |
-| Teste de interface | `agent-browser` — **pedir autorização antes** |
-| Performance, rede, console do navegador | `chrome-devtools` — **pedir autorização antes** |
+| Teste de interface | `agent-browser` — liberado contra ambiente local, ver seção 7 |
+| Performance, rede, console do navegador | `chrome-devtools` — liberado contra ambiente local, ver seção 7 |
 
 **Quando não plugar nada.** Pedido simples e direto ("renomeia essa variável", "o que faz esse
 arquivo") se responde direto. Acionar uma ferramenta numa tarefa trivial é ligar o aspirador para
@@ -137,7 +137,7 @@ Visão de conjunto do que está instalado hoje. O catálogo completo — com o c
 reinstalar cada item numa máquina nova — é o [claude/MANIFEST.md](claude/MANIFEST.md); aqui é só
 "o que é isso e por que ligar".
 
-### Plugins (17 habilitados)
+### Plugins (14 habilitados)
 
 Baixados de um marketplace — uma espécie de loja de plugins que o Claude Code consulta.
 
@@ -148,15 +148,12 @@ Baixados de um marketplace — uma espécie de loja de plugins que o Claude Code
 | claude-academy-guide | Guia de referência sobre o próprio Claude Code | Dúvida sobre hook, comando, MCP do Claude Code em si | Precisaria pesquisar a documentação oficial por fora |
 | claude-code-setup | Analisa um projeto e recomenda automações | Ao configurar o Claude Code num projeto pela primeira vez | As automações a montar são escolhidas no chute |
 | claude-md-management | Audita e atualiza o arquivo de instruções de um projeto | Suspeita de que o CLAUDE.md do projeto está desatualizado | Regra velha continua valendo sem ninguém notar |
-| code-review | Revisa um pull request inteiro | Antes de aprovar um PR | Revisão manual, sem checklist automático |
 | commit-commands | Atalhos para commit, push e abertura de PR | Ao fechar uma mudança pronta | Descrever o processo de novo a cada vez |
 | discernment-nudge | Lembra de confirmar antes de agir num pedido ambíguo | Sempre ativo, ajuda em qualquer pedido vago | Risco de agir sobre a primeira interpretação, que pode estar errada |
 | document-skills | Cria e edita Word, Excel, PowerPoint e PDF | Gerar ou editar um arquivo de escritório | Precisaria de outro programa aberto para o mesmo resultado |
 | example-skills | Pacote de exemplos prontos (marca, arte, comunicação) | Referência ou ponto de partida para algo fora do dia a dia | Começar do zero num tipo de tarefa pouco comum |
-| feature-dev | Guia o desenvolvimento de uma funcionalidade do início ao fim | Construir uma feature nova, entendendo o código existente antes | Risco de programar por cima do que já existe sem entender |
 | hookify | Cria automações a partir de "sempre que X, faça Y" | Quer uma automação nova sem escrever o hook na mão | Escrever o script de automação do zero |
 | ponytail | Mantém o código enxuto — questiona antes de construir o que não foi pedido | Sempre que há código sendo escrito | Risco de sobre-engenharia: abstração e configuração que ninguém pediu |
-| pr-review-toolkit | Kit de revisores especializados (teste, erro silencioso, design de tipo) | Revisão de PR sob mais de um ângulo | Uma passada de revisão só, sem essas lentes específicas |
 | superpowers | Coleção de métodos de trabalho (planejar antes, depurar sistematicamente) | Tarefa que se beneficia de processo, não de atalho | Risco de pular direto para a solução sem checar a causa |
 | ui-ux-pro-max | Kit de design de interface — marca, sistema de design, apresentação | Telas e materiais visuais, junto com `impeccable` | Design mais genérico, sem a régua de consistência visual |
 | vercel | Conecta o Claude Code à Vercel — deploy, variáveis de ambiente, Next.js | Projeto hospedado na Vercel | Operações feitas manualmente no painel da Vercel |
@@ -164,13 +161,19 @@ Baixados de um marketplace — uma espécie de loja de plugins que o Claude Code
 Instalado mas **não** habilitado no perfil global hoje: `watch@claude-video` (fica de fora até ser
 ligado de propósito).
 
+`code-review`, `feature-dev` e `pr-review-toolkit` saíram do perfil hoje. Os dois últimos traziam
+elenco de agente próprio (`pr-review-toolkit` sozinho despacha 6 revisores dele mesmo por
+invocação, `feature-dev` mais 3) e ignoravam o elenco global da seção 6 — cada despacho custa
+cerca de 4 milhões de tokens. `code-review` saiu junto por cobrir o mesmo papel do `code-reviewer`
+global sem trazer nada que ele já não fizesse.
+
 ### Skills (16)
 
 Procedimentos que o Claude já sabe seguir — pastas em `claude/skills/`.
 
 | Nome | O que faz | Quando usar | Sem ela |
 |---|---|---|---|
-| [agent-browser](claude/skills/agent-browser) | Automação de navegador de verdade, para testar tela e fluxo | Teste de interface — **pede autorização antes**, é sessão logada de verdade | Interface testada só de olho, sem confirmar o comportamento real |
+| [agent-browser](claude/skills/agent-browser) | Automação de navegador de verdade, para testar tela e fluxo | Teste de interface — liberado contra ambiente local, ver seção 7 | Interface testada só de olho, sem confirmar o comportamento real |
 | [brainstorm-para-plano](claude/skills/brainstorm-para-plano) | Transforma pedido vago em plano executável | Pedido que admite mais de uma interpretação razoável | Risco de construir a primeira leitura errada do pedido |
 | [clickup](claude/skills/clickup) | Mostra a fila de tarefas prontas no ClickUp, sem mexer em nada | Ver o que tem para fazer antes de decidir o que rodar | Teria que abrir o ClickUp e ler a fila manualmente |
 | [clickup-executar](claude/skills/clickup-executar) | Executa uma tarefa específica do ClickUp do início ao fim | Tarefa pontual, com id ou link | Ciclo de implementação inteiro guiado à mão, passo a passo |
@@ -199,7 +202,7 @@ Programas curtos que reagem sozinhos a um momento fixo — não são chamados po
 | checkpoint-automatico.mjs | Guarda um ponto de retorno (`git stash`) antes de operação irreversível | Antes de `git reset --hard`, `rebase`, `supabase db push`/`reset`, etc. | Comando destrutivo roda sem rede de segurança nenhuma por trás |
 | avisar-sql-nao-idempotente.mjs | Avisa se um `.sql` editado pode quebrar ao rodar mais de uma vez | Depois de criar/editar um arquivo `.sql` | Migração que só funciona na primeira execução passa despercebida |
 | secret-scan.mjs | Recusa gravar um arquivo com cara de senha, chave ou token | Antes de qualquer escrita de arquivo | Segredo entraria no repositório sem barreira nenhuma |
-| guard-main-branch.mjs | Pede confirmação antes de commit ou push direto na branch principal | Ao commitar/dar push estando na branch principal | Mudança vai direto para a branch principal sem esse alerta |
+| guard-main-branch.mjs | Pede confirmação antes de commit ou push direto na branch principal **Está no disco mas NÃO registrado no settings.json — hoje não dispara.** Foi desregistrado em 2026-08-25, quando o modo permissivo entrou: ele pedia confirmação, que é justamente o que a política nova dispensa. O aviso de comando destrutivo cobre o caso sem interromper. | Ao commitar/dar push estando na branch principal | Mudança vai direto para a branch principal sem esse alerta |
 | bootstrap-projeto.mjs | Ao abrir um projeto, lista o que falta da configuração e oferece criar | Uma vez por projeto, na primeira sessão | Peça de configuração faltando só é percebida quando dá problema |
 | lint-gate.mjs | Roda o verificador de qualidade só no arquivo que acabou de mudar | Depois de criar ou editar um arquivo | Erro de lint só aparece na próxima rodada manual |
 | format-on-edit.mjs | Formata o arquivo recém-editado, se o projeto já tem `biome`/`prettier` | Depois de criar ou editar um arquivo | Arquivo fica com a formatação que o agente escolheu na hora, fora do padrão do projeto |
@@ -224,8 +227,8 @@ máquina, por isso nenhum vem dentro do repositório.
 | claude.ai Google Drive | Leria e escreveria arquivo do Google Drive | — | **Conectado mas não autorizado hoje** — não funciona até autorizar em claude.ai → Conectores |
 | plugin:vercel:vercel | Gerenciaria deploy e ambiente de projeto Vercel pela conversa | — | **Conectado mas não autorizado hoje** — completar login via `claude mcp` ou `/mcp` |
 
-`chrome-devtools` também está conectado (controla um Chrome de verdade) — sempre **pede
-autorização antes**, os detalhes estão na seção 7.
+`chrome-devtools` também está conectado (controla um Chrome de verdade) — liberado contra ambiente
+local, os detalhes estão na seção 7.
 
 ### Programas de terminal
 
@@ -266,6 +269,10 @@ só o roteamento e a delegação; o trabalho pesado vai para os especialistas.
 | `test-writer` | sonnet | medium | Escrever e manter testes |
 | `doc-updater` | haiku | — | Documentação trivial, sincronizar texto |
 | `explorer` | haiku | — | **Localizar**: buscar, listar, grep — não interpreta |
+
+Os 17 declaram `tools:` no próprio frontmatter — nenhum herda a lista inteira por omissão — e
+nenhum inclui a ferramenta que despacha outro agente: um especialista não abre uma segunda camada
+de subagentes por conta própria, só a sessão principal delega.
 
 `explorer` e `code-explorer` não são a mesma coisa: o primeiro **acha** (mecânico, barato); o
 segundo **entende** (julgamento, mais caro). Pedir para achar um arquivo não precisa do segundo.
@@ -322,16 +329,18 @@ Este setup roda **liberado**. O Claude Code executa qualquer comando de terminal
 qualquer arquivo, acessa a web e usa as integrações (ClickUp, Obsidian) **sem pedir aprovação** —
 incluindo comando destrutivo: `rm -rf`, `git reset --hard`, `git push`, `supabase db push`.
 
-**Duas exceções**, e só elas, continuam perguntando:
+**Duas ferramentas não têm exceção fixa — quem decide é o alvo, não a ferramenta**: `agent-browser`
+e `chrome-devtools` clicam e digitam em interface de verdade, e hoje estão **liberados** — mas só
+enquanto o alvo é ambiente local (`localhost`, `127.0.0.1`, `*.local`, porta de desenvolvimento).
+Contra qualquer outro endereço — produção, painel do Supabase, ClickUp, Google Cloud, Meta — a
+sessão para e pede autorização antes de abrir o navegador, explicando em uma linha o que vai fazer
+e por quê. Sem servidor de desenvolvimento rodando, a sessão pergunta antes de subir um, em vez de
+apontar para produção por falta de alternativa.
 
-| O quê | Por quê |
-|---|---|
-| `agent-browser` | Clica em interface de verdade, numa sessão logada nas contas reais de Supabase, ClickUp, Google Cloud e banco |
-| `chrome-devtools` | Abre navegador nas mesmas contas |
-
-O motivo de serem essas duas: é o único tipo de dano que nenhuma das mitigações abaixo consegue
-desfazer. Um comando errado no terminal deixa rastro e tem ponto de retorno; um clique errado numa
-tela de produção, não.
+O motivo de tratar essas duas diferente do terminal: é o único tipo de dano que nenhuma das
+mitigações abaixo consegue desfazer. Um comando errado no terminal deixa rastro e tem ponto de
+retorno; um clique errado numa tela de produção, não — e é por isso que a liberação para
+`localhost` não se estende ao resto.
 
 A lista `deny` está **vazia** de propósito. Nada é bloqueado por ela.
 
