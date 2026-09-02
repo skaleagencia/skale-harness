@@ -15,6 +15,7 @@
 11. [Global × por projeto](#global--por-projeto)
 12. [Glossário](#glossário)
 13. [Ressalvas honestas](#ressalvas-honestas)
+14. [Documentação completa](#documentação-completa)
 
 ---
 
@@ -585,3 +586,19 @@ Documentação que só elogia é propaganda. Isto ainda não foi provado na prá
   Supabase (subir para o R2), então mesmo aplicando o template hoje essa etapa ainda dependeria
   desse passo.
 - **`supabase CLI` está desatualizado** (v2.84.2 instalada, existe v2.115.0).
+
+---
+
+## 14. Documentação completa
+
+Este README é a porta de entrada. O resto do conteúdo mora em arquivos próprios, por assunto:
+
+| Onde | O que tem |
+|---|---|
+| [SETUP.md](SETUP.md) | Passo a passo manual para máquina nova — para quando o `install.sh` falha ou você quer conferir na mão |
+| [claude/MANIFEST.md](claude/MANIFEST.md) | Catálogo completo de tudo que compõe o setup — plugin, skill, hook, programa de terminal — com o comando exato para reinstalar cada item |
+| [docs/README.md](docs/README.md) | Índice das pendências em aberto do harness e do skale-insight, e do plano original que deu origem a este repositório |
+| [templates/README.md](templates/README.md) | Modelos reaproveitáveis entre os quatro produtos — hoje, o backup do Supabase |
+
+Documentação de apoio nova entra em `docs/`, nunca solta na raiz — e o índice em
+[docs/README.md](docs/README.md) é atualizado no mesmo commit.
