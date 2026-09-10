@@ -25,7 +25,6 @@
     "próximo './backup.sh' já traz o conteúdo — só o valor do campo aqui não se atualiza sem alguém",
     "editar à mão."
   ],
-
   "projetos": {
     "skale-insight": {
       "nome": "skale-insight",
@@ -59,7 +58,7 @@
       "nome": "Skale Harness (este repositório)",
       "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/Skale Harness",
       "espelha": false,
-      "motivo": "só tem .bootstrap-check — nada da lista branca. É o próprio harness: a configuração dele é este repositório, não precisa de espelho à parte"
+      "motivo": "É este próprio repositório: o .claude/memory/ dele já é versionado direto na raiz. Espelhar criaria uma segunda cópia do mesmo conteúdo, que divergiria da primeira no dia em que alguém editasse só uma das duas."
     }
   }
 }

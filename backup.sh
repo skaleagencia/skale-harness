@@ -103,7 +103,7 @@ comparar() {
       for item in "${ITENS_PROJETO[@]}"; do
         comparar_item "$slug/$item" "$caminho/.claude/$item" "$DEST/projetos/$slug/$item"
       done
-    done < <(jq -r '.projetos | to_entries[] | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
+    done < <(jq -r '.projetos | to_entries[] | select(.value.espelha != false) | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
   fi
 
   echo
@@ -158,7 +158,7 @@ trazer_projetos() {
       echo "  ok  $slug  (nada da lista branca nesta máquina)"
     fi
     sincronizados=$((sincronizados + 1))
-  done < <(jq -r '.projetos | to_entries[] | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
+  done < <(jq -r '.projetos | to_entries[] | select(.value.espelha != false) | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
 
   echo
   echo "$sincronizados projeto(s) verificado(s), $pulados pulado(s) (não encontrado nesta máquina)."

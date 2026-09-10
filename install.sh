@@ -216,7 +216,9 @@ sincronizar_projetos() {
 
     verde "  ok  $slug  ($copiados item(ns) de ${ITENS_PROJETO[*]})"
     sincronizados=$((sincronizados + 1))
-  done < <(jq -r '.projetos | to_entries[] | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
+    # "espelha": false sai daqui — o harness é o próprio repositório, e projeto que só tem
+    # settings.local.json não tem nada da lista branca para copiar.
+  done < <(jq -r '.projetos | to_entries[] | select(.value.espelha != false) | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
 
   echo
   verde "  $sincronizados projeto(s) sincronizado(s), $pulados pulado(s) (não encontrado nesta máquina)."
