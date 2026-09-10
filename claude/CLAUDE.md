@@ -283,8 +283,15 @@ entra — usar o token de uma empresa no contexto de outra é a falha mais cara 
 **`migration-specialist` entra quando há DDL** — criar ou alterar tabela, índice, política. Não entra
 para ler dado nem para ajustar consulta.
 
-**Teto de 5 despachos por tarefa.** Ao chegar no quinto, pare e diga em uma linha por que o sexto é
+**Teto de 5 despachos por tarefa — e desde 2026-09-10 isto é trava, não pedido.** O hook
+`limite-despachos.mjs` conta e decide: até 5 passa calado, de 6 a 11 passa com o número na tela, e a
+partir do 12º a chamada é **negada**. Ao chegar no quinto, pare e diga em uma linha por que o sexto é
 necessário. Se não souber explicar, ele não é.
+
+Uma tarefa, para o contador, não é uma mensagem — "corrige isso" e "agora testa" são o mesmo
+trabalho. É a sequência de despachos: 20 minutos sem despachar nada zeram a contagem. Se a negação
+aparecer no meio de um trabalho legítimo, o caminho não é contornar, é dizer ao Eric por que aquele
+despacho é necessário.
 
 **Do segundo despacho em diante, anuncie antes:** qual especialista, com que model e effort, e por
 que este trabalho não cabe no despacho anterior.
