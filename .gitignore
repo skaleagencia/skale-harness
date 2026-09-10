@@ -38,3 +38,12 @@ node_modules/
 # Panorama do setup: levantamento local, nunca publicado.
 # Lista caminho da máquina, plugins, MCPs e consumo — mapa de reconhecimento do ambiente.
 PANORAMA.md
+
+# --- exceção: a memória DESTE repositório precisa ser versionada ---
+# O ~/.gitignore_global ignora .claude/ em todo lugar, e faz sentido: nos projetos de produto
+# essa pasta é configuração de máquina. Aqui não — aqui ela guarda as lições de trabalho, que
+# são justamente o que não pode se perder. As três linhas abaixo desfazem a regra global só
+# para .claude/memory/, mantendo o resto de .claude/ fora (é estado de sessão).
+!.claude/
+.claude/*
+!.claude/memory/
