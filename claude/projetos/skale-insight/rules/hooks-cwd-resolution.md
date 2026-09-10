@@ -46,7 +46,7 @@ const projectDir = cwdArg || process.env.CLAUDE_PROJECT_DIR || process.cwd();
 **Purpose B — stable session identity key.** Some hooks need a shared
 storage location to pass state from one hook invocation to a *later,
 different* hook invocation in the same session (e.g. `set-files-changed.mjs`
-writes a flag; `memory-stop.mjs`, `large-file-warning.mjs`, and the generated
+writes a flag; `memory-stop.mjs`, `arquivo-grande-ao-editar.mjs`, and the generated
 strict `verify-on-stop` hook all read it later). **Use
 `sessionScratchDir(sessionId)` from `.claude/hooks/session-scratch.mjs`,
 keyed by `event.session_id` — never `event.cwd`, and never a hash of
@@ -102,7 +102,7 @@ regardless of which worktree the session is in.
 command AND a shared flag-file lookup, or a shared flag-file lookup AND a
 project-wide resource), keep them as separate, distinctly named variables —
 never let one purpose's value leak into another's path. See
-`.claude/hooks/large-file-warning.mjs` for a worked example of an A+B split.
+`.claude/hooks/arquivo-grande-ao-editar.mjs` for a worked example of an A+B split.
 
 ## Which one do you have? A quick test
 
@@ -120,7 +120,7 @@ value change?"
 ## Canonical examples in this codebase
 
 - Pure Purpose A: `guard-main-branch.mjs`, `worktree-write-guard.mjs`.
-- Purpose A + B split in the same file: `large-file-warning.mjs`.
+- Purpose A + B split in the same file: `arquivo-grande-ao-editar.mjs`.
 - Pure Purpose B (correctly never touches `event.cwd` or `CLAUDE_PROJECT_DIR`
   for the flag path — only `sessionScratchDir(sessionId)`):
   `set-files-changed.mjs`, `memory-stop.mjs`.

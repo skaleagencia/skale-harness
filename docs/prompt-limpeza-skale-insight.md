@@ -34,7 +34,7 @@ theme-factory, zerar-avisos-lint
 
 HOOKS JÁ GLOBAIS: rtk-proxy.mjs, lint-gate.mjs, orchestration-mode.mjs,
 bootstrap-projeto.mjs, secret-scan.mjs, guard-main-branch.mjs,
-validate-settings-schema.mjs, large-file-warning.mjs
+validate-settings-schema.mjs, arquivo-grande-ao-editar.mjs
 
 O QUE JÁ FOI FEITO AQUI — não refaça, não desfaça
 
@@ -43,7 +43,7 @@ O QUE JÁ FOI FEITO AQUI — não refaça, não desfaça
   project-planner, seo-specialist.
 - 4 hooks foram promovidos ao global e removidos daqui, junto com o registro deles no
   settings.json: secret-scan, guard-main-branch, validate-settings-schema,
-  large-file-warning.
+  arquivo-grande-ao-editar.
 - Foram apagados: skills/impeccable (duplicata exata da global), skills/memory-system e
   commands/remember.md (gravavam em .agents/memory/, pasta que não existe aqui),
   skills/react-performance (o plugin vercel já entrega isso atualizado), rules/testing.md,

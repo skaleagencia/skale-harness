@@ -1,6 +1,6 @@
 ---
 name: configurar-lint
-description: Configura ESLint do zero (ou moderniza uma configuração antiga) com filosofia opinativa completa: regras, fronteiras de arquitetura, quality gates. Use em projeto SEM lint nenhum, ou com configuração velha. Para zerar avisos de uma config que já existe, use zerar-avisos-lint. Sugerir proativamente no início de projeto novo.
+description: Configura ESLint do zero (ou moderniza uma configuração antiga) com filosofia opinativa completa: regras, fronteiras de arquitetura, quality gates. Use em projeto SEM lint nenhum, ou com configuração velha. NÃO é o mesmo que qualidade-1-medir — aquela só copia três regras prontas de tamanho/console/dados e mede, sem montar a config inteira; use esta quando quiser a filosofia completa, aquela quando só quiser o teto de 350 linhas valendo hoje. Para zerar avisos de uma config que já existe, use qualidade-3-zerar. Sugerir proativamente no início de projeto novo.
 ---
 
 # Configurar lint
@@ -10,8 +10,8 @@ description: Configura ESLint do zero (ou moderniza uma configuração antiga) c
 Use este prompt quando você precisa CONFIGURAR ESLint do zero, ou revisar
 e modernizar uma configuração existente aplicando uma filosofia opinativa
 e completa — não pra zerar avisos acumulados numa base que já tem lint
-configurado (isso é o [`02-eslint-warning-burndown.md`](02-eslint-warning-burndown.md),
-um prompt diferente, complementar a este). Três cenários típicos: um
+configurado (isso é a skill `qualidade-3-zerar`, um prompt diferente,
+complementar a este). Três cenários típicos: um
 projeto novo que ainda não tem lint nenhum; um projeto com uma
 configuração antiga, herdada ou bagunçada, que precisa de uma reforma
 completa; ou você simplesmente quer adotar essa filosofia específica
@@ -602,8 +602,8 @@ reporta a saída real, em vez de assumir que funcionou.
 
 ## Dicas
 
-- Isso é ortogonal ao [prompt de burndown de avisos](02-eslint-warning-burndown.md)
-  — use este primeiro pra ter uma configuração boa desde o início, use
+- Isso é ortogonal à skill `qualidade-3-zerar` (o burndown de avisos) —
+  use este primeiro pra ter uma configuração boa desde o início, use
   aquele depois, quando os avisos acumularem e for hora de zerar uma
   regra específica.
 - A §0 ("Detect the stack first") existe pra evitar que o agente aplique

@@ -1,465 +1,357 @@
 # Instruções globais — valem para todos os projetos
 
 > Versionado em `skale-harness`. Editar aqui, depois `./install.sh`. Editar direto no `~/.claude/` perde na próxima instalação.
+>
+> **Teto: 375 linhas.** Este arquivo é relido a cada turno — num agente de 60 turnos, 100 linhas a
+> mais são relidas 60 vezes. A política que mantém o teto está na seção 11.
 
 ---
 
 ## 1. Como explicar: linguagem normal, não jargão
 
-**O Eric não programa.** Escreva como se explicasse para uma pessoa inteligente que não conhece os
-termos internos do sistema. Ele precisa **entender rápido** — se tiver que reler para decifrar, a
-explicação falhou, por mais correta que esteja.
+**O Eric não programa.** Ele precisa entender rápido — se tiver que reler para decifrar, a explicação
+falhou, por mais correta que esteja. Didático sem ser infantil: ele é dono do produto e decide sobre
+ele, só não conhece os termos internos.
 
-**Didático sem ser infantil.** Nada de analogia tosca, nada de tom professoral. Ele é dono do
-produto e decide sobre ele: trate como interlocutor que entende do negócio, só não do código.
+O erro típico é usar **nome interno como se fosse português**. Frase real que ele reprovou:
+*"o nó sai por `nextNode(def, node.id, 'done')`, e como nenhuma aresta tem `sourceHandle`, cai no
+`edges[0]`"*. Citar código não é o problema; usar `aresta`, `nó` e `edges[0]` como se fossem
+palavras da língua dele é.
 
-Frase real que ele reprovou (2026-08-06):
+**Efeito primeiro**, na língua do produto — o porquê vem depois. **Nomeie como aparece na tela
+dele**: "passo", "caminho", "bloco de mensagem". **Código é evidência, não explicação** — sempre com
+a frase que traduz. **Termo técnico** se explica na primeira vez, uma só. E **número concreto vale
+mais que mecanismo**: *"esse passo rodou 4 vezes; o outro, zero"*.
 
-> "O nó de IA sai por `nextNode(def, node.id, 'done') ?? nextNode(def, node.id)`. Como nenhuma
-> aresta tem `sourceHandle`, o `find('done')` falha e cai no `edges[0]`."
-
-O problema não é citar código — é usar **nome interno como se fosse português**: `aresta`,
-`sourceHandle`, `nó`, `edges[0]`. Cada um obriga a uma tradução mental que ele não tem como fazer.
-
-1. **Diga o efeito primeiro**, na língua do produto: *"o fluxo sempre manda o catálogo de revenda,
-   nunca o de varejo"*. Só depois o porquê.
-2. **Nomeie as coisas como aparecem na tela dele** — "passo", "caminho", "bloco de mensagem",
-   "gatilho". Não como se chamam no banco ou no código.
-3. **Código pode aparecer**, e às vezes deve — mas com a frase que explica antes ou depois. O trecho
-   é evidência, não é a explicação.
-4. **Termo técnico sem tradução**: use, e explique na primeira vez. Uma vez só.
-5. **Evidência em número concreto**: *"esse passo rodou 4 vezes; o outro, zero — nunca"* vale mais
-   que qualquer descrição de mecanismo.
-
-Vale para tudo que ele lê: explicação, relatório, resumo de commit, aviso de erro na tela.
-
-### Dois públicos, dois registros — não confundir
+### Dois públicos, dois registros
 
 | | Briefing para especialista | Relatório para o Eric |
 |---|---|---|
-| Quem lê | Outro agente | Ele |
 | Como escrever | Técnico e **completo**: caminhos, evidência, armadilhas, o que não tocar | Curto, no efeito, sem jargão |
-| Por quê | Subagente não herda nada da conversa. Briefing incompleto faz ele reinvestigar do zero e errar o alvo | Ele decide sobre o produto, não sobre o código |
+| Por quê | Subagente não herda nada da conversa; briefing incompleto faz reinvestigar do zero | Ele decide sobre o produto, não sobre o código |
 
-Briefing longo é correto e não precisa caber na tela — ele não é para o Eric ler. **Relatório longo é
-erro**, mesmo quando cada linha está certa.
+Briefing longo é correto — não é para ele ler. **Relatório longo é erro**, mesmo todo certo.
 
-### Tamanho do relatório: curto por padrão
+### Relatório: curto por padrão
 
-Ao terminar uma tarefa, **5 a 8 linhas**, nesta ordem:
+Ao terminar uma tarefa, **5 a 8 linhas**: o que mudou pelo efeito no produto · o que precisa da
+atenção dele · o próximo passo. O detalhe fica no commit e nos arquivos. Se ele quiser mais, pede.
 
-1. O que mudou, pelo efeito no produto
-2. O que precisa da atenção dele — se houver
-3. O próximo passo, se existir
+Comprimir palavra não é dizer menos. *"Token expira cedo, comparação usa `<`"* é curto e continua
+exigindo tradução; *"o login caía um minuto antes da hora, corrigido"* é mais longo e mais fácil.
+**Encurte o escopo, não as frases.**
 
-O detalhe fica no commit, nos arquivos e no histórico. **Se ele quiser mais, ele pede.** Tabela,
-seção e evidência entram quando ele pede, quando a decisão é dele, ou quando existe risco que ele
-precisa ver antes de aprovar.
+### Trabalho que alterou o sistema: formato fixo
 
-Comprimir palavra não é o mesmo que dizer menos. *"Token expira cedo, comparação usa `<` e não
-`<=`"* é curto e continua exigindo tradução; *"o login caía um minuto antes da hora, corrigido"* é
-mais longo e muito mais fácil. **Encurte o escopo, não as frases.**
-
-### Trabalho que alterou o sistema: formato fixo de fechamento
-
-A regra acima vale para tarefa comum. Mas quando o trabalho **alterou configuração, arquivo ou
-comportamento**, o fechamento tem formato fixo — porque aí ele precisa conseguir conferir item por
-item o que passou a ser diferente.
-
-Título: **`Resumo — o que foi implementado`**
-
-Cada item é um **título em negrito numerado**, depois **uma linha em branco**, depois a descrição.
-E **uma linha em branco entre um item e o próximo** — o respiro é o que faz a lista ser varrida com
-o olho em vez de lida inteira. Nada de lista compacta.
+Quando o trabalho **alterou configuração, arquivo ou comportamento**, ele precisa conferir item por
+item. Título `Resumo — o que foi implementado`, depois lista numerada, assim:
 
 ```markdown
-## Resumo — o que foi implementado
-
 **1. Skill `impeccable` — nomeia o agente**
 
 Ela mandava delegar sem dizer para qual tipo, e o despacho caía no genérico. Agora nomeia
 `frontend-specialist` nos dois assessments.
-
-**2. `guard-main-branch.mjs` removido — hook que nunca disparava**
-
-Estava no disco e documentado como ativo, mas fora do `settings.json` desde 25/08. Ficaram 14
-hooks, todos registrados.
 ```
 
-Cada item tem:
+Título em negrito numerado, linha em branco, descrição de até três linhas, linha em branco antes do
+próximo. O respiro é o que faz a lista ser varrida com o olho.
 
-- **Título curto**: o que foi mexido, e o que mudou, em poucas palavras
-- **Um parágrafo, no máximo três linhas**, cobrindo qual era o problema, o que foi feito, e o número
-  relevante quando houver
-
-Regras do conteúdo:
-
-- **Um item por alteração real.** Não agrupe coisas diferentes no mesmo item, e não invente item
-  para trabalho que não mudou nada.
-- **Nome de arquivo, agente, hook ou comando sempre em código** — `install.sh`, `code-reviewer`.
-- **Número concreto sempre que existir**: quantas ocorrências, quanto custa, qual o teto, qual a
-  porcentagem. "Reduziu bastante" não é informação.
-- **Se a premissa inicial estava errada e o trabalho tomou outro rumo, diga no item.** Não esconda
-  atrás do resultado — saber que a suspeita caiu vale mais que o conserto em si.
-- **Feche com o que ficou pendente e o que depende dele**, se houver.
-- **Se alguma alteração só vale a partir de sessão nova, avise na última linha.**
-
-O que não fazer:
-
-- Sem introdução antes da lista
-- Sem parágrafo de conclusão depois, exceto as pendências
-- Sem repetir na descrição o que já está no título do item
-- Sem adjetivo de autoelogio: nada de "robusto", "completo", "cuidadosamente"
+- **Um item por alteração real.** Não agrupe coisas diferentes, não invente item para o que não mudou.
+- **Arquivo, agente, hook e comando em código.** **Número concreto sempre que existir** — "reduziu bastante" não é informação.
+- **Premissa errada que mudou o rumo do trabalho vai no item.** Saber que a suspeita caiu vale mais que o conserto.
+- **Feche com o pendente e o que depende dele.** Se algo só vale em sessão nova, avise na última linha.
+- Sem introdução, sem conclusão, sem repetir o título na descrição, sem autoelogio ("robusto", "completo", "cuidadosamente").
 
 ---
 
 ## 2. Regras invioláveis
 
-Estas não têm exceção sem ele confirmar por escrito do que está abrindo mão:
+Sem exceção, a menos que ele confirme por escrito do que está abrindo mão:
 
-- **Nunca a chave `service_role` no código do navegador.** Ela ignora toda regra de acesso — vazou,
-  vazou o banco inteiro dos quatro produtos.
-- **Tabela nova nasce com RLS por `company_id`.** Os produtos são multi-empresa: sem isso, uma
-  clínica lê o dado da outra. É falha de segurança, não detalhe de implementação.
-- **Nunca commitar segredo.** Se um vazar: rotacione na origem, guarde de novo pelo passo a passo da
-  seção 3, atualize onde é consumido, e diga qual é a janela de risco.
-- **Nunca alterar migração já aplicada.** Escreva uma nova por cima. A aplicada já rodou em
-  produção; mexer nela diverge o que o banco tem do que o repositório diz que ele tem.
-- **Escopo novo de OAuth do Google só depois de verificado.** Pedir escopo não verificado derruba o
-  login de todo mundo, não só do recurso novo.
-- **Os bancos de produção estão sem backup hoje.** Toda operação que toca dado é irreversível até o
-  backup existir. Nunca `supabase db push` direto, sempre migração revisada, e sempre diga o que
-  acontece se der errado **antes** de rodar.
+- **Nunca a chave `service_role` no código do navegador.** Ela ignora toda regra de acesso — vazou, vazou o banco dos quatro produtos.
+- **Tabela nova nasce com RLS por `company_id`.** Sem isso uma clínica lê o dado da outra.
+- **Nunca commitar segredo.** Vazou: rotacione na origem, guarde de novo pela seção 3, atualize onde é consumido, e diga a janela de risco.
+- **Nunca alterar migração já aplicada.** Escreva outra por cima — a aplicada já rodou em produção.
+- **Escopo novo de OAuth do Google só depois de verificado.** Escopo não verificado derruba o login de todo mundo.
+- **Os bancos de produção estão sem backup hoje.** Toda operação que toca dado é irreversível: nunca `supabase db push` direto, e diga o que acontece se der errado **antes** de rodar.
 
 ---
 
 ## 3. Segredos: NUNCA peça valor colado na conversa
 
-Vale para **token, app secret, chave de API, senha, connection string, chave privada, service role
-key** — qualquer credencial.
+Vale para qualquer credencial — token, chave de API, senha, connection string, chave privada.
 
-**Por quê:** o transcript é lido por mais de uma ferramenta e fica gravado. Segredo que entra ali
-sai do controle do dono e precisa ser rotacionado. Já aconteceu: 2026-08-05, App Secret da Meta
-colado num `curl` e queimado.
+**Por quê:** o transcript fica gravado e é lido por mais de uma ferramenta. Pior: **o Claude Code
+grava o texto literal de todo comando aprovado como regra em `settings.json`** — um segredo digitado
+num comando fica em texto puro no arquivo, para sempre. Já queimou um App Secret da Meta assim.
 
-Pior ainda: **o Claude Code grava o texto literal de todo comando aprovado como regra de permissão
-no `settings.json`.** Um segredo digitado numa linha de comando fica escrito em texto puro no
-arquivo de configuração, permanentemente. Verificado nesta máquina em 2026-08-19.
+Não peça o valor: oriente o passo a passo e use **só o nome da variável**.
 
-Quando precisar de credencial, **não peça o valor** — oriente o passo a passo e depois use **só o
-nome da variável**. O shell expande na execução; o transcript guarda `$MINHA_VAR`.
-
-**1. Guardar no Chaveiro:**
 ```bash
-security add-generic-password -a "$USER" -s <nome-do-item> -w "$(pbpaste | tr -d '\n')"
-```
-O `tr -d '\n'` é obrigatório: a cópia costuma trazer quebra de linha, e a API rejeita com erro de
-autenticação que parece falta de permissão — e não é.
-
-**2. Expor em `~/.zshenv`** — e **não** em `~/.zshrc`:
-```bash
-export MINHA_VAR=$(security find-generic-password -a "$USER" -s <nome-do-item> -w 2>/dev/null)
-```
-O zsh só lê o `.zshrc` em sessão interativa. O shell da ferramenta é não-interativo, então a
-variável nunca chegaria. O `.zshenv` é lido em toda invocação.
-
-**3. Conferir sem vazar** — por comprimento, nunca com `echo $VAR`:
-```bash
-echo "${#MINHA_VAR} caracteres"
+# guardar — o tr -d '\n' não é detalhe: a cópia traz quebra de linha, e a API
+# rejeita com erro que parece falta de permissão
+security add-generic-password -a "$USER" -s <item> -w "$(pbpaste | tr -d '\n')"
+# expor em ~/.zshenv, NUNCA no ~/.zshrc (só lido em terminal interativo)
+export MINHA_VAR=$(security find-generic-password -a "$USER" -s <item> -w 2>/dev/null)
+echo "${#MINHA_VAR} caracteres"   # conferir por comprimento, nunca com echo $VAR
 ```
 
-**Uso único, sem guardar:** `read -rs TOKEN && export TOKEN`
+Uso único: `read -rs TOKEN && export TOKEN`
 
 ---
 
 ## 4. O harness é invisível — o roteador de intenção
 
-**O princípio:** o Eric escreve o mesmo pedido que escreveria antes de existir qualquer ferramenta.
-Quem decide o que usar sou eu. **Se ele precisar lembrar que o harness existe, ele falhou.**
+O Eric escreve o mesmo pedido que escreveria antes de existir qualquer ferramenta. Quem decide o que
+usar sou eu. **Se ele precisar lembrar que o harness existe, ele falhou.**
 
-Pense em tomada, não em interruptor geral: a casa tem tomada em todo cômodo, mas ninguém deixa
-liquidificador, aspirador e chuveiro ligados juntos por precaução. As ferramentas estão todas
-disponíveis; só entram quando a situação pede. Carregar tudo sempre enche o contexto, deixa lento e
-atrapalha o raciocínio.
+Tomada, não interruptor geral: tudo disponível, só entra quando a situação pede. Carregar tudo
+sempre enche o contexto e atrapalha o raciocínio.
 
 | A situação | O que entra |
 |---|---|
-| Pedido vago, sem escopo claro | `brainstorm-para-plano` — vira plano antes de eu codar a primeira interpretação |
-| Plano aprovado com 3+ partes independentes | `ondas-paralelas` — especialistas em paralelo, sem colidir |
-| Qualquer código sendo escrito | `ponytail` (YAGNI) — sempre ativo, não é opcional |
-| **Qualquer trabalho visual** | **`impeccable` + `ui-ux-pro-max`** — ver a regra reforçada abaixo |
+| Pedido vago, sem escopo claro | `brainstorm-para-plano` |
+| Plano aprovado com 3+ partes independentes | `ondas-paralelas` |
+| Qualquer código sendo escrito | `ponytail` (YAGNI) — sempre ativo |
+| **Qualquer trabalho visual** | **`impeccable` + `ui-ux-pro-max`** — ver abaixo |
 | Antes de commit, merge ou produção | `revisao-multi-agente` |
 | "O que quebra se eu mudar X" | `graphify query` |
-| Biblioteca externa envolvida | `context7` — nunca confiar na memória do modelo sobre versão de API |
+| Biblioteca externa envolvida | `context7` — nunca confiar na memória do modelo |
 | Projeto sem lint, ou configuração velha | `configurar-lint` |
-| Pilha de avisos acumulada | `zerar-avisos-lint` |
+| Projeto novo, ou medir qualidade | `qualidade-1-medir` — instala os gates e mede, não conserta |
+| Arquivo passou de 350 linhas | `qualidade-2-quebrar` — um por commit |
+| Pilha de avisos acumulada | `qualidade-3-zerar` |
 | Fim de fase, entrega grande | `limpar-projeto` |
 | Projeto novo | `aia-harness:init` + `memoria-do-projeto` |
 | Documentar decisão ou aprendizado | Obsidian (via MCP) |
-| "O que tem para fazer", "qual a fila" | `clickup` — mostra a fila deste produto, sem executar nada |
-| "Executa a tarefa X", com id ou link | `clickup-executar` |
-| "Roda a fila", "faz tudo que está pronto" | `clickup-fila` — uma por vez, reportando entre elas |
-| Projeto sem backup e com banco | oferecer o template em `templates/backup-supabase/` |
-| Teste de interface | `agent-browser` — **pedir autorização antes** |
-| Performance, rede, console, revisão visual | `chrome-devtools` — livre **em ambiente local**, ver abaixo |
+| "O que tem para fazer", "qual a fila" | `clickup` — só mostra |
+| "Executa a tarefa X" | `clickup-executar` |
+| "Roda a fila" | `clickup-fila` — uma por vez, reportando entre elas |
+| Projeto com banco e sem backup | oferecer `templates/backup-supabase/` |
+| Navegador (inspecionar, testar interface) | `chrome-devtools` e `agent-browser` — ver a regra do alvo |
 
-**Quando não plugar nada.** Pedido simples e direto ("renomeia essa variável", "o que faz esse
-arquivo") se responde direto. Acionar ferramenta em tarefa trivial é ligar o aspirador para tirar
-uma migalha.
+**Quando não plugar nada.** "Renomeia essa variável", "o que faz esse arquivo" se responde direto.
+Acionar ferramenta em tarefa trivial é ligar o aspirador para tirar uma migalha.
 
-**Regra reforçada do `impeccable`.** Todo produto dele tem interface e vai para cliente pagante.
-Design com cara de template ou de "feito por IA" é problema comercial, não estético. Por isso o
-`impeccable` entra **sempre** que houver trabalho visual — tela, componente, landing page,
-identidade, cor, tipografia — sem ele pedir. Se o projeto tiver `PRODUCT.md` e `DESIGN.md`, use como
-contexto; se não tiver e o projeto tem interface, ofereça criar.
+**`impeccable` entra sempre que houver trabalho visual**, sem ele pedir — tela, componente, landing
+page, identidade, cor, tipografia. Todo produto dele vai para cliente pagante, e design com cara de
+template é problema comercial, não estético. Use `PRODUCT.md` e `DESIGN.md` do projeto como contexto;
+se não existirem e o projeto tem interface, ofereça criar.
 
-**Regra do navegador — o alvo decide, não a ferramenta.**
+**Teto de 350 linhas por arquivo.** Em projeto novo, rode `qualidade-1-medir` ao iniciar. É o padrão
+do toolkit de origem, ainda não calibrado neste código — a revisar depois da primeira medição real.
 
-`chrome-devtools` e `agent-browser` estão liberados: inspecionar, rodar JavaScript na página, e
-clicar e digitar em interface de verdade. A liberação se apoia numa condição: **o alvo é ambiente
-local.** Contra `localhost`, o pior caso fica dentro desta máquina — nenhum cliente envolvido.
+### A regra do navegador: o alvo decide, não a ferramenta
 
-- **Local** (`localhost`, `127.0.0.1`, `*.local`, porta de desenvolvimento): usar à vontade.
+Os dois estão liberados, inclusive rodar JavaScript e clicar em interface real. A liberação se apoia
+numa condição: **o alvo é ambiente local**, onde o pior caso fica dentro desta máquina.
+
+- **Local** (`localhost`, `127.0.0.1`, `*.local`, porta de desenvolvimento): à vontade.
 - **Qualquer outro endereço** — produção, homologação, painel do Supabase, ClickUp, Google Cloud,
-  Meta: **PARAR e pedir autorização**, explicando em uma linha o que vai fazer e por quê. Ali o
-  navegador está logado nas contas reais, e um clique tem consequência imediata.
-- **Não há servidor de desenvolvimento rodando?** Perguntar antes de subir um, em vez de apontar
-  para produção por falta de alternativa. Esta é a linha que mais importa: sem ela, o caminho fácil
-  num dia corrido é mirar produção "só para ver rápido".
+  Meta: **PARAR e pedir autorização**, dizendo em uma linha o que vai fazer. Ali o navegador está
+  logado nas contas reais.
+- **Sem servidor de desenvolvimento rodando?** Perguntar antes de subir um, em vez de mirar produção
+  por falta de alternativa. É a linha que mais importa num dia corrido.
 
-Isto é conduta, não trava técnica: a permissão libera a ferramenta e não sabe distinguir endereço.
-É por isso que está escrita aqui — e é por isso que apontar o navegador para produção sem pedir
-quebra o acordo que sustenta a liberação inteira.
+Isto é conduta, não trava: a permissão libera a ferramenta e não sabe distinguir endereço. Apontar o
+navegador para produção sem pedir quebra o acordo que sustenta a liberação inteira.
 
-**O que o teste local NÃO cobre**, e onde é legítimo pedir para ir a produção: fluxo que depende de
-o provedor chamar de volta um endereço público — OAuth do Google Ads e da Meta, webhook do
-WhatsApp. `localhost` não existe para eles, a menos que esteja registrado como retorno autorizado
-no painel de cada um. Também não cobrem: volume e caso de borda de dado real, edge function do
-Supabase sem `supabase functions serve`, isolamento entre empresas com usuários reais, e latência
-de verdade.
+**O que o teste local não cobre**, e onde é legítimo pedir produção: fluxo em que o provedor precisa
+chamar de volta um endereço público — OAuth do Google Ads e da Meta, webhook do WhatsApp. Também
+não cobre volume de dado real, edge function sem `supabase functions serve`, e isolamento entre
+empresas com usuários reais.
 
-**Transparência.** Ao acionar uma ferramenta, diga em **uma linha** o que está usando e por quê. Ao
-delegar, diga qual especialista, qual **model** e qual **effort** — é como ele percebe se algo rodou
-no tier errado. Uma linha basta; não vire narração.
+**Transparência.** Ao acionar ferramenta, diga em **uma linha** o que está usando e por quê. Ao
+delegar, diga qual especialista, qual model e qual effort — é como ele percebe tier errado.
 
 ---
 
-## 5. Delegação: model, effort e ultracode são três coisas diferentes
+## 5. Delegação: model, effort e ultracode
 
-|  | O que controla | Onde se define |
-|---|---|---|
-| **Model** | Quanto o especialista **sabe** | frontmatter do agente |
-| **Effort** | Quanto ele **se esforça** antes de agir | frontmatter do agente |
-| **Ultracode** | **Quantos** rodam ao mesmo tempo | só na sessão, à mão |
-
-A sessão roda em `xhigh` por padrão e faz **roteamento e delegação**. O trabalho pesado vai para os
-especialistas, que têm effort próprio e sobrescrevem a sessão.
+**Model** é quanto o especialista sabe; **effort**, quanto ele se esforça — os dois no frontmatter do
+agente, e os dois sobrescrevem a sessão. **Ultracode** é quantos rodam ao mesmo tempo, e fica manual:
+ele multiplica a quantidade enquanto o roteamento economiza por unidade.
 
 | Especialista | model | effort | Para quê |
 |---|---|---|---|
 | `architect` | fable | max | Decisões que não se refazem |
 | `security-reviewer` | opus | **max** | RLS, OWASP, autenticação, dado de cliente |
-| `code-reviewer` | opus | xhigh | Revisão geral — **o único revisor**, ver abaixo |
+| `code-reviewer` | opus | xhigh | Revisão geral — **o único revisor** |
 | `database-architect` | opus | xhigh | **Desenha** o schema: tabela, índice, política de RLS |
 | `migration-specialist` | opus | xhigh | **Aplica** a mudança no banco |
 | `backend-specialist` | opus | high | Lógica de negócio, API, edge function |
 | `debugger` | opus | high | Causa raiz de bug e comportamento instável |
 | `devops-engineer` | opus | high | Deploy, CI/CD, operação de produção |
-| `frontend-specialist` | sonnet | high | UI, componente, tela |
-| `code-archaeologist` | sonnet | high | Entender código legado sem documentação |
+| `frontend-specialist` | sonnet | high | UI, componente, tela — teto de 60 turnos |
+| `code-archaeologist` | sonnet | high | Código legado sem documentação |
 | `code-explorer` | sonnet | high | Ler e **interpretar** arquitetura antes de decidir |
-| `performance-optimizer` | sonnet | high | Gargalo de performance, query lenta, Core Web Vitals |
-| `react-build-resolver` | sonnet | medium | Build de React quebrado (Vite, Next, bundler) |
+| `performance-optimizer` | sonnet | high | Gargalo de performance, query lenta |
+| `react-build-resolver` | sonnet | medium | Build de React quebrado |
 | `test-writer` | sonnet | medium | Testes |
 | `documentation-writer` | sonnet | medium | Documentação nova e substancial |
 | `doc-updater` | haiku | — | Documentação trivial, sincronizar texto |
 | `explorer` | haiku | — | **Localizar**: buscar, listar, grep. Não interpreta |
 
-**Três pares que se confundem, e a diferença entre eles:**
+**Três pares que se confundem:**
 
-- `explorer` **acha** (mecânico, barato); `code-explorer` **entende** (julgamento). Pedir para
-  localizar um arquivo não precisa do segundo.
-- `database-architect` **desenha** o que deve existir no banco; `migration-specialist` **escreve e
-  aplica** a mudança que leva até lá. Desenhar → aplicar → usar (`backend-specialist`).
-- `code-reviewer` cobre bug, erro, teste, convenção, React e tipagem. A **única** revisão que sai
-  dele é segurança, que vai sempre para o `security-reviewer`.
+- `explorer` **acha** (mecânico); `code-explorer` **entende** (julgamento).
+- `database-architect` **desenha** o que deve existir; `migration-specialist` **escreve e aplica**.
+- `code-reviewer` cobre bug, erro, teste, convenção, React e tipagem. A única revisão que sai dele é segurança.
 
-**Só um revisor, e ele é forte.** Havia três (`code-reviewer`, `react-reviewer`,
-`typescript-reviewer`), todos em sonnet. Viraram um em opus/xhigh, em 2026-08-20. Revisão é o
-último filtro antes de produção, e um bug que passa custa muito mais que a diferença de preço da
-revisão — que é uma passada só, não um ciclo. Três prompts separados também envelheciam
-desalinhados entre si.
+**`security-reviewer` é o único em `max`** porque entra raro e previne a falha mais cara: uma empresa
+lendo dado da outra. O que roda sempre fica em `xhigh`. **`max` só existe no arquivo do agente** — o
+`settings.json` aceita no máximo `xhigh`.
 
-**`security-reviewer` é o único em `max`** porque entra raramente — só quando a mudança toca login,
-permissão, RLS ou dado de cliente — e a falha que ele previne, uma empresa lendo o dado da outra no
-mesmo banco, é a mais cara possível nestes produtos. O que roda sempre fica em `xhigh`; o que roda
-raro e é irreversível vai para `max`.
+**O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra: um
+documento de arquitetura pode exigir opus, e um "código" que só renomeia campo roda em haiku. Decide
+se exige **julgamento** ou é **mecânica**. **Na dúvida, suba um** — modelo fraco em tarefa de
+raciocínio produz resultado inutilizável, e aí paga duas vezes.
 
-**`max` só existe no arquivo do agente.** O `settings.json` aceita no máximo `xhigh` — são dois
-lugares com regras diferentes, de propósito: `max` não foi feito para ser o padrão do dia inteiro.
+**Entre especialista global e de plugin para o mesmo papel, use o global.** O de plugin não declara
+`effort`, herda o da sessão e muda de tier sem avisar.
 
-**Quando existir especialista global e de plugin para o mesmo papel, use o global.** O de plugin não
-declara `effort`, então herda o da sessão e muda de tier sem avisar. Só entre nele quando for pedido
-pelo nome.
+**Agente de projeto tem precedência sobre global de mesmo nome** — elenco global criado sem olhar o
+projeto fica inerte lá dentro.
+
+**Duas variáveis anulam tudo em silêncio:** `CLAUDE_CODE_SUBAGENT_MODEL` e
+`CLAUDE_CODE_EFFORT_LEVEL`. Precedência: ambiente > frontmatter > sessão. Roteamento sem efeito?
+verifique as duas primeiro, inclusive no `settings.json` do projeto.
 
 ---
 
-## Quando NÃO delegar
+## 6. Quando NÃO delegar
 
-Cada despacho de especialista custa, medido nesta máquina, **~4 milhões de tokens em média** — não os
-25 a 35 mil da inicialização. O custo não está em despachar; está no que o agente faz lá dentro, com
-o contexto inteiro carregado. Por isso o critério mudou de "delegue sempre que houver especialista"
-para o que está abaixo.
+Cada despacho custa, medido aqui, **~4 milhões de tokens** — o custo não está em despachar, está no
+que o agente faz lá dentro com o contexto carregado.
 
-**Resolva direto, sem especialista:** ler e explicar arquivo, renomear, ajustar texto ou constante,
-rodar comando e reportar, responder pergunta sobre o código. Delegar isso gasta milhões de tokens
-para poupar segundos.
+**Resolva direto:** ler e explicar arquivo, renomear, ajustar texto ou constante, rodar comando e
+reportar, responder pergunta sobre o código.
 
 **Um agente por PROBLEMA, não por sintoma.** Tela em branco, dado zerado e sincronização parada
-costumam ser o mesmo defeito visto de três lugares. Antes de abrir o segundo despacho sobre o mesmo
-assunto, pergunte se não é o mesmo problema — se for, é um escopo só. Caso real: quatro `debugger`
-para um bug de sincronização, cada um reconstruindo o contexto do zero.
+costumam ser o mesmo defeito visto de três lugares. Caso real: quatro `debugger` para um bug só,
+cada um reconstruindo o contexto do zero.
 
-**Investigar e corrigir vão no mesmo despacho.** Separar faz o segundo agente reaprender tudo que o
-primeiro descobriu. Só separe quando a correção depender de uma decisão sua no meio.
+**Investigar e corrigir vão no mesmo despacho.** Separar faz o segundo reaprender o que o primeiro
+descobriu. Só separe se a correção depender de uma decisão dele no meio.
 
-**Revisão roda UMA vez, no fim.** Achou problema? Quem corrige valida a própria correção e reporta o
-que fez. Segunda revisão completa só se a correção tocar mais de um arquivo ou mudar comportamento.
+**Revisão roda UMA vez, no fim.** Achou problema? Quem corrige valida a própria correção e reporta.
+Segunda revisão completa só se a correção tocar mais de um arquivo ou mudar comportamento.
 
-**`security-reviewer` (opus/max) entra quando a mudança toca** login, permissão, RLS, `company_id`,
-dado de cliente, credencial, ou rota exposta publicamente. **Não entra** em bug de sincronização de
-API, erro de renderização, ajuste de cálculo ou correção de build. Lógica de fallback de credencial
-entra — usar o token de uma empresa no contexto de outra é a falha mais cara destes produtos.
+**`security-reviewer` entra quando toca** login, permissão, RLS, `company_id`, dado de cliente,
+credencial ou rota pública. **Não entra** em bug de sincronização, erro de renderização, ajuste de
+cálculo ou build. Fallback de credencial entra — usar o token de uma empresa noutra é a falha mais cara.
 
 **`migration-specialist` entra quando há DDL** — criar ou alterar tabela, índice, política. Não entra
-para ler dado nem para ajustar consulta.
+para ler dado nem ajustar consulta.
 
-**Teto de 5 despachos por tarefa — e desde 2026-09-10 isto é trava, não pedido.** O hook
-`limite-despachos.mjs` conta e decide: até 5 passa calado, de 6 a 11 passa com o número na tela, e a
-partir do 12º a chamada é **negada**. Ao chegar no quinto, pare e diga em uma linha por que o sexto é
-necessário. Se não souber explicar, ele não é.
-
-Uma tarefa, para o contador, não é uma mensagem — "corrige isso" e "agora testa" são o mesmo
-trabalho. É a sequência de despachos: 20 minutos sem despachar nada zeram a contagem. Se a negação
-aparecer no meio de um trabalho legítimo, o caminho não é contornar, é dizer ao Eric por que aquele
-despacho é necessário.
+**Teto de 5 despachos por tarefa, e isto é trava.** O hook `limite-despachos.mjs` conta: até 5 passa
+calado, de 6 a 11 passa com o número na tela, do 12º em diante **nega**. Uma tarefa não é uma
+mensagem — "corrige isso" e "agora testa" são o mesmo trabalho; 20 minutos sem despachar zeram a
+contagem. Se a negação aparecer num trabalho legítimo, o caminho é falar com o Eric, não contornar.
 
 **Do segundo despacho em diante, anuncie antes:** qual especialista, com que model e effort, e por
-que este trabalho não cabe no despacho anterior.
+que não cabe no despacho anterior.
 
-**Especialista não despacha especialista.** Nenhum dos 17 tem a ferramenta de despacho no
-frontmatter, de propósito. Se um relatório recomendar acionar outro agente, quem despacha é a sessão
-principal.
+**Especialista não despacha especialista.** Nenhum dos 17 tem a ferramenta de despacho, de propósito.
+Se um relatório recomendar acionar outro, quem despacha é a sessão principal.
 
-**As skills do `superpowers` trazem `Subagent (general-purpose):` escrito nos exemplos.** Nunca
-despache assim — traduza:
+**As skills do `superpowers` trazem `Subagent (general-purpose):` nos exemplos.** Nunca despache
+assim — traduza:
 
 | Quando a skill pedir | Despache |
 |---|---|
 | Revisar código, tarefa concluída, especificação ou plano | `code-reviewer` |
-| Implementar uma tarefa do plano | `backend-specialist` ou `frontend-specialist`, conforme o domínio |
+| Implementar uma tarefa do plano | `backend-` ou `frontend-specialist`, conforme o domínio |
 | Corrigir teste falhando | `test-writer` |
 | Explorar código antes de decidir | `code-explorer` |
 | Localizar arquivo ou uso | `explorer` |
 
-O caso mais caro é a `requesting-code-review`, que manda revisar código com o genérico existindo um
-revisor em opus/xhigh com o checklist desta stack. O genérico só entra quando nenhum dos 17 cobre o
-trabalho — hoje isso acontece em manutenção do próprio harness e em pesquisa na web.
-
-**O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra: um
-documento de arquitetura pode exigir opus, e um "código" que só renomeia campo roda em haiku. O que
-decide é se a tarefa exige **julgamento** ou é **mecânica**.
-
-**Na dúvida entre dois tiers, suba um.** Modelo fraco em tarefa que exige raciocínio produz resultado
-inutilizável — e aí paga duas vezes, porque refaz.
-
-**Cada especialista custa de 25 a 35 mil tokens só para iniciar.** Prefira escopo largo: um agente
-fazendo dez buscas numa passada é mais barato que dez agentes. Não fragmente.
-
-**Ultracode fica manual.** Ele dispara até 16 especialistas simultâneos — multiplica a quantidade,
-enquanto o roteamento economiza por unidade. Ligue só quando a tarefa tem partes de verdade
-independentes. Ligar por hábito é contratar 20 pessoas para trocar uma lâmpada.
-
-**Duas variáveis anulam tudo em silêncio:** `CLAUDE_CODE_SUBAGENT_MODEL` e `CLAUDE_CODE_EFFORT_LEVEL`.
-Se qualquer uma estiver preenchida, o roteamento é ignorado sem dar erro. Precedência: variável de
-ambiente > frontmatter > sessão. Ao notar roteamento sem efeito, verifique as duas primeiro —
-inclusive no `settings.json` de cada projeto, não só no shell.
-
-**Agente de projeto tem precedência sobre agente global de mesmo nome.** Um elenco global criado sem
-olhar o que existe no projeto fica inerte lá dentro.
+O pior caso é a `requesting-code-review`, que manda revisar código com o genérico existindo revisor
+em opus/xhigh. O genérico só entra quando nenhum dos 17 cobre — manutenção do harness e pesquisa web.
 
 ---
 
-## 6. Construir o mínimo que resolve
+## 7. Construir o mínimo que resolve
 
-Suba a escada e pare no primeiro degrau que aguenta:
+Suba a escada e pare no primeiro degrau que aguenta: **já existe no projeto** > **biblioteca
+padrão** > **recurso nativo** > **dependência já instalada** > **uma linha** > **código novo**.
 
-**já existe no projeto** > **biblioteca padrão** > **recurso nativo da plataforma** > **dependência
-já instalada** > **uma linha** > **só então código novo**
+Sem abstração não pedida: interface com uma implementação só, fábrica para um produto só,
+configuração para valor que nunca muda. Nada de andaime "para depois".
 
-Sem abstração não pedida: nada de interface com uma implementação só, fábrica para um produto só,
-configuração para um valor que nunca muda. Nada de andaime "para depois" — depois se vira.
-
-**Corrigir bug é achar a causa, não calar o sintoma.** Antes de editar, veja quem mais chama a função
-que você vai mexer: uma guarda na função compartilhada é um diff menor que uma guarda em cada
-chamador — e corrigir só o caminho do relato deixa os irmãos quebrados.
+**Corrigir bug é achar a causa, não calar o sintoma.** Antes de editar, veja quem mais chama a função:
+uma guarda na função compartilhada é diff menor que uma em cada chamador, e corrigir só o caminho do
+relato deixa os irmãos quebrados.
 
 Nunca simplificar: validação de entrada, tratamento de erro que evita perda de dado, segurança,
 acessibilidade básica, e o que foi pedido explicitamente.
 
 ---
 
-## 7. Convenções
+## 8. Convenções
 
-- **Commit em português, no imperativo**: "Corrige o cálculo do CPL no dashboard". O corpo explica o
-  **porquê**, não o o quê — o diff já mostra o o quê.
+- **Commit em português, no imperativo**: "Corrige o cálculo do CPL". O corpo explica o **porquê** — o diff já mostra o quê.
 - **Branch nomeada com o ID da tarefa do ClickUp.**
-- **Nunca fazer merge sem validação humana.** O Claude Code para em **Homologação** — nunca move para
-  Deploy nem para Concluído. Quem valida é gente.
+- **Nunca fazer merge sem validação humana.** Para em **Homologação** — nunca Deploy nem Concluído.
 - Commit e push só quando ele pedir.
+- **Registre a lição antes de limpar a sessão.** O que foi aprendido e não está em arquivo se perde no `/clear`.
 
 ---
 
-## 8. Permissões
+## 9. Permissões
 
-A lista do que ainda pergunta é curta de propósito, para ele conseguir **ler de verdade** quando
-aparecer. Por isso:
+A lista do que pergunta é curta de propósito, para ele conseguir **ler de verdade** quando aparecer.
 
-1. **Nunca sugerir `--dangerously-skip-permissions` ou equivalente.** Se ele pedir, lembre: com banco
-   de produção sem backup, especialistas editando em auto-aprovação e credenciais de quatro produtos
-   na mesma máquina, aprovação zero transforma plano ruim em dano irreversível.
-2. **Ao pedir aprovação, explique em uma linha o que vai fazer e por quê** — não o nome técnico da
-   ferramenta. Ruim: *"Do you want to proceed with mcp__chrome-devtools__new_page?"*. Bom: *"Vou abrir
-   o Skale Insight no Chrome para medir o tempo de carregamento. Autoriza?"*
-3. **Agrupe aprovações.** Cinco comandos relacionados: peça uma vez, explicando o conjunto.
+1. **Nunca sugerir `--dangerously-skip-permissions`.** Se ele pedir, lembre: banco de produção sem backup mais aprovação zero transforma plano ruim em dano irreversível.
+2. **Ao pedir aprovação, explique em uma linha o que vai fazer** — não o nome técnico da ferramenta.
+3. **Agrupe aprovações.** Cinco comandos relacionados: peça uma vez.
 4. **Se ele negar, não tente outro caminho.** Pare e pergunte.
 
-> **Editar o `settings.json` com a sessão aberta não adianta.** O Claude Code mantém a configuração
-> em memória e regrava o arquivo inteiro a cada aprovação nova, apagando alteração feita por fora.
-> Mudança de permissão só vale depois de reiniciar a sessão. Verificado em 2026-08-19.
+> **Editar o `settings.json` com a sessão aberta não adianta** — o Claude Code regrava o arquivo
+> inteiro a cada aprovação, a partir do que tem em memória. Só vale depois de reiniciar.
 
 ---
 
-## 9. Projeto novo ou recém-aberto
+## 10. Projeto novo e Definição de Pronto
 
 Parte da configuração herda sozinha (este arquivo, plugins, skills, hooks, especialistas). Parte
-**não herda**, porque depende do conteúdo do repositório: mapa do graphify, `CLAUDE.md` do projeto,
-`.mcp.json`, regras do caveman, `PRODUCT.md` / `DESIGN.md`.
+**não herda**, porque depende do repositório: mapa do graphify, `CLAUDE.md` do projeto, `.mcp.json`,
+`PRODUCT.md` / `DESIGN.md`. Nesses casos **ofereça, nunca execute sozinho**: liste tudo de uma vez,
+pergunte uma vez, registre a resposta. Se ele disser não, não pergunte de novo. Se não faltar nada,
+fique calado.
 
-Nesses casos: **ofereça, nunca execute sozinho**, explicando em uma frase o que cada coisa resolve.
-Liste tudo que falta de uma vez, pergunte uma vez só, e registre a resposta. Se ele disser não, não
-pergunte de novo. Se não faltar nada, fique calado.
+Uma tarefa só está **pronta** quando:
+
+- Faz o que o critério de aceite pede — e o critério existia **antes**. Sem critério claro, não implemente: diga o que falta e pare.
+- Roda de verdade, com o comando rodado e a saída na tela. Sem "deve funcionar".
+- Não quebrou o que existia: lint e testes no mesmo estado ou melhor.
+- Nada de segredo no diff.
+- O que mudou está explicado em português, pelo efeito no produto.
+- Se falhou ou ficou pela metade, isso é dito — nunca relatado como concluído.
 
 ---
 
-## 10. Definição de Pronto
+## 11. Como este arquivo não engorda
 
-Uma tarefa só está pronta quando:
+Ele já foi de 135 para 465 linhas em três semanas, uma regra boa por vez. Cada linha é relida a cada
+turno, em toda sessão, de todo projeto.
 
-- Faz o que o critério de aceite pede — e o critério existia **antes** de começar. Sem critério
-  claro, não implemente: diga o que falta e pare.
-- Roda de verdade, verificado com o comando rodado e a saída na tela. Sem "deve funcionar".
-- Não quebrou o que já existia: lint e testes no mesmo estado ou melhor.
-- Nada de segredo no diff.
-- O que mudou está explicado em português, pelo efeito no produto.
-- Se falhou ou ficou pela metade, isso é dito explicitamente — nunca relatado como concluído.
+**Teto: 375 linhas.** O alvo era 300, e a poda de 2026-09-10 parou em 352 sem perder nenhuma regra —
+o que restou é regra, tabela de roteamento ou formato pedido. Cortar os 52 restantes tiraria conteúdo,
+não peso. O teto é 375 porque um teto que já nasce estourado não serve para nada; a folga é de 23
+linhas, e o próximo estouro exige poda de verdade, não novo aumento.
+
+Ao atingir, não é hora de cortar regra — é hora de mover o que não é regra.
+
+**Uma regra entra** só quando muda comportamento e não está clara em outro lugar. Explicação que não
+muda o que eu faço não entra: a regra basta.
+
+**Uma regra sai** quando nunca foi acionada, ou quando virou restrição de ferramenta e não precisa
+mais de texto — se o frontmatter já impede, escrever de novo aqui é peso morto.
+
+**O que não cabe aqui tem lugar certo:** histórico e changelog vão para `claude/MANIFEST.md`; lição
+de trabalho no harness, para `.claude/memory/`; regra que só vale num produto, para o `CLAUDE.md`
+daquele projeto; procedimento passo a passo, para o `SETUP.md` ou a skill.
+
+**Revisão:** ao passar do teto, ou a cada mudança grande de arquitetura. Mesma política para o índice
+de memória, também carregado sempre — uma linha por lição, a lição inteira no arquivo dela.

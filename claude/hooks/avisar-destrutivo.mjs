@@ -11,7 +11,7 @@
  *
  * Como avisa: devolve `hookSpecificOutput.additionalContext` sem tocar em
  * `permissionDecision` — é o mecanismo de injetar contexto que os outros hooks da pasta
- * usam (lint-gate, large-file-warning), só que aqui em PreToolUse, antes do comando
+ * usam (lint-gate, arquivo-grande-ao-editar), só que aqui em PreToolUse, antes do comando
  * rodar. Não incluir `permissionDecision` garante que este hook nunca decide nada sobre
  * o comando — só comenta.
  *

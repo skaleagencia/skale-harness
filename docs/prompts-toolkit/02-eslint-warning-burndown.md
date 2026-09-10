@@ -1,17 +1,39 @@
----
-name: zerar-avisos-lint
-description: Zera uma pilha acumulada de avisos de lint (ESLint/Biome), em ondas rastreadas, sem quebrar nada. Use quando houver muitos warnings antigos e o projeto JÁ tenha lint configurado. Se não tiver configuração ainda, use antes a skill configurar-lint. Sugerir quando o build acusar dezenas de avisos.
----
+# ESLint warning burndown
 
-# Zerar avisos lint
+## Atalho: só o link
+
+Se você chegou aqui pela sequência do
+[`08`](08-eslint-quality-gates-install.md) →
+[`09`](09-file-size-refactor.md) e agora quer zerar o que sobrou (console
+direto, acesso a dados fora de lugar, orçamento de complexidade), cole
+esta linha no seu agente:
+
+```
+Leia https://raw.githubusercontent.com/soumatheusgomes/vibe-coding-toolkit/main/docs/prompts/02-eslint-warning-burndown.md
+e execute o prompt que está nesse arquivo neste projeto, para o conjunto
+inteiro de avisos restantes. Descubra sozinho os comandos de lint, teste,
+typecheck e build lendo o package.json.
+```
+
+O resto deste documento é o mesmo prompt, aberto, pra quem prefere colar o
+texto inteiro ou escolher uma regra específica em vez do conjunto todo.
 
 ## Quando usar
 
-Se o projeto ainda não tem uma configuração de ESLint decente pra
-começar, use antes o [`07-eslint-complete-setup.md`](07-eslint-complete-setup.md)
-— ele monta a configuração do zero; este prompt aqui serve pra depois,
-quando os avisos de uma configuração já existente acumularam e é hora
-de zerá-los.
+Se o projeto ainda não tem uma configuração de ESLint decente pra começar,
+use antes um dos dois que montam a configuração: o
+[`08-eslint-quality-gates-install.md`](08-eslint-quality-gates-install.md)
+(o atalho — copia três regras prontas e mede) ou o
+[`07-eslint-complete-setup.md`](07-eslint-complete-setup.md) (o completo — o
+agente monta a config raciocinando sobre a sua stack). Este prompt aqui serve
+pra depois, quando os avisos de uma configuração já existente acumularam e é
+hora de zerá-los.
+
+Se os avisos que você quer zerar são especificamente de **tamanho de
+arquivo**, vá direto pro
+[`09-file-size-refactor.md`](09-file-size-refactor.md): quebrar um arquivo de
+800 linhas é um tipo de trabalho diferente de corrigir 240 avisos de
+`complexity`, e aquele prompt é feito só pra isso.
 
 Use este prompt quando você tem uma pilha grande de warnings de lint pra
 zerar — ou quer revisar e reapertar deliberadamente uma regra específica —

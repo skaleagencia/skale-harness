@@ -122,7 +122,7 @@
           },
           {
             "type": "command",
-            "command": "node /Users/ericsoarese/.claude/hooks/large-file-warning.mjs",
+            "command": "node /Users/ericsoarese/.claude/hooks/arquivo-grande-ao-editar.mjs",
             "timeout": 10
           },
           {
@@ -170,6 +170,18 @@
             "command": "node",
             "args": [
               "/Users/ericsoarese/.claude/hooks/bootstrap-projeto.mjs"
+            ],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "/Users/ericsoarese/.claude/hooks/arquivo-grande-ao-abrir.mjs"
             ],
             "timeout": 5
           }

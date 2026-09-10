@@ -207,7 +207,7 @@ Programas curtos que reagem sozinhos a um momento fixo — não são chamados po
 | format-on-edit.mjs | Formata o arquivo recém-editado, se o projeto já tem `biome`/`prettier` | Depois de criar ou editar um arquivo | Arquivo fica com a formatação que o agente escolheu na hora, fora do padrão do projeto |
 | orchestration-mode.mjs | Ativa o modo "delega para especialista" em vez de fazer tudo na mesma conversa | A cada mensagem | Trabalho pesado tentado na sessão principal, sem o roteamento da seção 6 |
 | validate-settings-schema.mjs | Avisa se um arquivo de configuração ficou com formato inválido | Depois de editar um arquivo de configuração do Claude Code | Erro só aparece na próxima sessão, quando nada carrega |
-| large-file-warning.mjs | Avisa quando um arquivo passa de ~350 linhas | Ao escrever um arquivo grande | Arquivo cresce sem ninguém sugerir dividir |
+| arquivo-grande-ao-editar.mjs | Avisa quando um arquivo passa de ~350 linhas | Ao escrever um arquivo grande | Arquivo cresce sem ninguém sugerir dividir |
 | gh-scope-guard.mjs | Mostra o comando certo quando o `gh` falha por permissão faltando | Depois de um comando `gh` que falha por escopo OAuth | Risco de contornar com um token novo em vez de ajustar a credencial já logada |
 | graphify-orient.mjs | Lembra de consultar o mapa do código antes de vasculhar arquivo por arquivo | Antes de `Bash`/`Read`/`Glob`, se o mapa já existe | Busca às cegas por algo que o mapa já responderia de cara |
 | rtk-proxy.mjs | Resume o resultado de um comando de leitura para gastar menos tokens | Antes de um comando de leitura no terminal | Conversa consome mais tokens do que precisaria para o mesmo resultado |

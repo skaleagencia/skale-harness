@@ -50,13 +50,13 @@ saía por dezenas de milhões. A única capacidade que se perdia — a caça a f
 
 ## Skills
 
-Pastas dentro de `~/.claude/skills/`, já versionadas em `claude/skills/` neste repositório (16).
+Pastas dentro de `~/.claude/skills/`, já versionadas em `claude/skills/` neste repositório (18).
 Categoria A — o `install.sh` copia direto, nada para instalar à parte.
 
 | Nome | O que faz | Categoria | Como instalar |
 |---|---|---|---|
 | brainstorm-para-plano | Antes de eu sair codando um pedido vago ("melhora o dashboard"), transforma o pedido num plano claro — evita eu construir a primeira interpretação errada. | A | `./install.sh` (copia `claude/skills/brainstorm-para-plano`) |
-| configurar-lint | Monta as regras de qualidade de código (lint) do zero num projeto novo, ou moderniza uma configuração velha. | A | `./install.sh` (copia `claude/skills/configurar-lint`) |
+| configurar-lint | Monta as regras de qualidade de código (lint) do zero num projeto novo, ou moderniza uma configuração velha — filosofia completa. Para só o teto de tamanho de arquivo, ver `qualidade-1-medir` abaixo. | A | `./install.sh` (copia `claude/skills/configurar-lint`) |
 | design-pro | Direção visual de interface — cor, tipografia, espaçamento, hierarquia, estados de componente, formulário, tabela, gráfico, responsivo, acessibilidade. Sobrepõe-se ao `impeccable`; usar os dois juntos em trabalho visual. **Era um atalho para `~/Desktop/claude-skills/design-pro` e por isso não estava versionada de verdade** — corrigido em 2026-08-19, agora o conteúdo mora no repositório. | A | `./install.sh` |
 | frontend-design | Ajuda a escolher direção visual (tipografia, estilo) que não pareça modelo genérico, ao criar ou redesenhar uma tela. | A | `./install.sh` (copia `claude/skills/frontend-design`) |
 | impeccable | Skill de design de produto — a mais importante do negócio, porque todo produto do Eric tem interface e vai para cliente pagante. Cobre crítica, polimento, acessibilidade, hierarquia visual e sistema de design completo de uma tela, componente ou landing page. Deve entrar sozinha em qualquer trabalho visual, sem eu precisar pedir. Usa dois arquivos próprios de cada projeto (PRODUCT.md e DESIGN.md), que não vêm neste repositório. | A | `./install.sh` (copia `claude/skills/impeccable`) |
@@ -65,12 +65,27 @@ Categoria A — o `install.sh` copia direto, nada para instalar à parte.
 | ondas-paralelas | Pega uma lista de tarefas independentes de um plano aprovado e distribui entre vários agentes trabalhando ao mesmo tempo, sem um pisar no arquivo do outro. | A | `./install.sh` (copia `claude/skills/ondas-paralelas`) |
 | revisao-multi-agente | Revisa um código pronto com vários revisores em paralelo, cada um olhando por um ângulo diferente (segurança, correção, performance) — em vez de uma passada só. | A | `./install.sh` (copia `claude/skills/revisao-multi-agente`) |
 | theme-factory | Aplica um visual pronto (cor, fonte) a um material gerado — apresentação, relatório, página — escolhendo entre 10 estilos prontos ou criando um novo na hora. | A | `./install.sh` (copia `claude/skills/theme-factory`) |
-| zerar-avisos-lint | Zera uma pilha de avisos de qualidade de código já acumulados, em lotes controlados, sem quebrar o que já funciona — para quando o lint já existe mas ninguém nunca zerou os avisos. | A | `./install.sh` (copia `claude/skills/zerar-avisos-lint`) |
+| qualidade-1-medir | Passo 1 da trinca de qualidade: instala três regras de ESLint já testadas (teto de 350 linhas, sem `console` direto, UI sem acessar banco direto) e MEDE quantas violações existem — nunca conserta. | A | `./install.sh` (copia `claude/skills/qualidade-1-medir`, com a pasta `referencia/` de dentro) |
+| qualidade-2-quebrar | Passo 2: quebra os arquivos que passaram do teto em módulos menores, um arquivo por commit, cortando por responsabilidade — nunca por contagem de linha. Se não houver costura natural, diz isso e para, em vez de inventar abstração para agradar o linter. | A | `./install.sh` (copia `claude/skills/qualidade-2-quebrar`) |
+| qualidade-3-zerar | Passo 3 (renomeada de `zerar-avisos-lint` em 2026-09-10): zera o que sobrou da pilha de avisos — qualquer regra, não só as três da qualidade-1 — em ondas rastreadas, sem quebrar o que já funciona. | A | `./install.sh` (copia `claude/skills/qualidade-3-zerar`) |
 | clickup | Mostra a fila de tarefas deste produto no ClickUp — o que está pronto para pegar, em que ordem, e por quê. Não executa nada, não altera nada. | A | `./install.sh` |
 | clickup-executar | Executa uma tarefa do ClickUp do início ao fim: lê a especificação nos comentários, implementa, valida e deixa em Homologação. Nunca move para Deploy nem Concluído — quem valida é você. | A | `./install.sh` |
 | clickup-fila | Executa a fila inteira, uma tarefa por vez, reportando o resultado entre elas. Para e chama você quando aparece pergunta em aberto. | A | `./install.sh` |
 | graphify | Ensina a usar o mapa do código: responder "o que quebra se eu mudar isso" numa consulta, em vez de abrir arquivo por arquivo. | A | `./install.sh` |
 | agent-browser | Ensina a usar o navegador automatizado para testar interface de verdade. Pede autorização antes de abrir — a sessão pode estar logada nas suas contas reais. | A | `./install.sh` |
+
+**Origem da trinca `qualidade-1/2/3`** (instalada em 2026-09-10): as três executam prompts do
+repositório `soumatheusgomes/vibe-coding-toolkit`, commit `13add21`, baixados nesse mesmo dia para
+`docs/prompts-toolkit/` — `08-eslint-quality-gates-install.md` (qualidade-1), `09-file-size-refactor.md`
+(qualidade-2) e `02-eslint-warning-burndown.md` (qualidade-3, já existia como `zerar-avisos-lint` e
+foi renomeada, mantendo o conteúdo e o tom em português). A `qualidade-1-medir` também carrega
+cópia local dos seis arquivos de regra do toolkit (`referencia/templates/`), para não depender de
+buscar nada na rede.
+
+**`MAX_LINES=350` é o padrão do toolkit original, não uma medição feita neste código.** As três
+skills e o hook `arquivo-grande-ao-abrir.mjs` usam esse valor porque é o que o toolkit recomenda de
+fábrica — vale revisar depois que a primeira medição real (`qualidade-1-medir` rodando em algum
+produto do Eric) mostrar se 350 é alto ou baixo demais para o jeito que o código daqui é escrito.
 
 ---
 
@@ -188,7 +203,8 @@ chamados por mim). Categoria A.
 | bootstrap-projeto.mjs | Ao abrir um projeto pela primeira vez, lista o que falta ali (mapa do código, CLAUDE.md, regras, integrações) explicando para que serve cada coisa, e **oferece** criar. Nunca executa sozinho, pergunta uma vez só e nunca mais. | A | `./install.sh` |
 | secret-scan.mjs | Antes de gravar qualquer arquivo, recusa a escrita se o conteúdo tiver cara de senha, chave ou token. É o único que bloqueia de verdade — e bloqueia de propósito. | A | `./install.sh` |
 | validate-settings-schema.mjs | Depois de editar um arquivo de configuração do Claude Code, avisa se ele ficou com formato inválido — antes de você descobrir na próxima sessão, quando nada carrega. | A | `./install.sh` |
-| large-file-warning.mjs | Avisa quando um arquivo passa de ~350 linhas, sugerindo dividir. Só avisa. | A | `./install.sh` |
+| arquivo-grande-ao-editar.mjs | Avisa quando um arquivo passa de ~350 linhas, sugerindo dividir. Só avisa. | A | `./install.sh` |
+| arquivo-grande-ao-abrir.mjs | Ao abrir um projeto (evento SessionStart, diferente do `arquivo-grande-ao-editar.mjs` acima que dispara a cada edição): se o projeto não tem o quality gate de ESLint instalado, avisa uma vez e sugere `qualidade-1-medir`; se já tem, conta quantos arquivos passam de 350 linhas e só avisa quando esse número mudou desde a última sessão. Não instala nada, não bloqueia, não conserta. Ainda não está registrado em nenhum `settings.json` — falta o passo de ligá-lo lá. | A | `./install.sh` (copia `claude/hooks/arquivo-grande-ao-abrir.mjs`) |
 
 ---
 
@@ -400,3 +416,45 @@ de `usage` dos arquivos de subagente, deduplicada por identificador de requisiç
 **Como medir de novo:** repetir a mesma contagem por agente daqui a 14 dias e comparar a média por
 despacho do `frontend-specialist`. É o número que a mudança de 10/09 (teto de 60 turnos e regras de
 agrupamento) deve derrubar.
+
+---
+
+## Movido do CLAUDE.md na poda de 2026-09-10
+
+O CLAUDE.md global tinha chegado a 465 linhas, contra o alvo original de 150 a 250. Como é relido a
+cada turno, cada linha custa contexto sempre. A poda tirou 113 linhas (24%) sem remover nenhuma
+regra — o que saiu foi explicação, exemplo redundante e histórico. O histórico está aqui.
+
+**Por que existe um revisor só.** Havia três — `code-reviewer`, `react-reviewer` e
+`typescript-reviewer` —, todos em sonnet. Viraram um em opus/xhigh, em 2026-08-20. Revisão é o
+último filtro antes de produção e é uma passada só, não um ciclo: um bug que passa custa muito mais
+que a diferença de preço. Três prompts separados também envelheciam desalinhados entre si.
+
+**Por que o `security-reviewer` é o único em `max`.** Entra raramente — só quando a mudança toca
+login, permissão, RLS ou dado de cliente — e previne a falha mais cara possível nestes produtos: uma
+empresa lendo o dado da outra no mesmo banco. O que roda sempre fica em `xhigh`; o que roda raro e é
+irreversível vai para `max`.
+
+**Contradição corrigida na mesma poda.** O arquivo afirmava, em dois lugares diferentes, que um
+despacho custa "25 a 35 mil tokens só para iniciar" e "~4 milhões em média". O primeiro número era da
+suposição inicial, o segundo é o medido. Ficou só o medido.
+
+**Sobre `ultracode`.** Dispara até 16 especialistas simultâneos: multiplica a quantidade, enquanto o
+roteamento economiza por unidade. Fica manual, ligado só quando a tarefa tem partes de verdade
+independentes.
+
+**A política de crescimento** está agora na seção 11 do próprio CLAUDE.md: teto de 375 linhas,
+critério para uma regra entrar e sair, e onde vai o que não cabe. O teto foi 300 na primeira versão
+e virou 375 no mesmo dia — a poda parou em 352 sem perder regra, e teto que nasce estourado não
+serve.
+
+## Quality gates — origem do material
+
+Os três prompts em `docs/prompts-toolkit/` e os arquivos de regra em
+`docs/prompts-toolkit/templates/` vieram do repositório `soumatheusgomes/vibe-coding-toolkit`,
+**commit `13add21`, baixados em 2026-09-10**. Estão versionados aqui para o fluxo não depender de
+rede nem de mudança no repositório de origem.
+
+**`MAX_LINES=350` é o padrão do toolkit original, não medido neste código.** A revisar depois da
+primeira medição real com `qualidade-1-medir` — pode ser que 350 seja apertado ou folgado demais
+para a stack destes produtos.
