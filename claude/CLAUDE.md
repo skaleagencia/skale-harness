@@ -68,7 +68,25 @@ item o que passou a ser diferente.
 
 Título: **`Resumo — o que foi implementado`**
 
-Lista numerada. Cada item tem:
+Cada item é um **título em negrito numerado**, depois **uma linha em branco**, depois a descrição.
+E **uma linha em branco entre um item e o próximo** — o respiro é o que faz a lista ser varrida com
+o olho em vez de lida inteira. Nada de lista compacta.
+
+```markdown
+## Resumo — o que foi implementado
+
+**1. Skill `impeccable` — nomeia o agente**
+
+Ela mandava delegar sem dizer para qual tipo, e o despacho caía no genérico. Agora nomeia
+`frontend-specialist` nos dois assessments.
+
+**2. `guard-main-branch.mjs` removido — hook que nunca disparava**
+
+Estava no disco e documentado como ativo, mas fora do `settings.json` desde 25/08. Ficaram 14
+hooks, todos registrados.
+```
+
+Cada item tem:
 
 - **Título curto**: o que foi mexido, e o que mudou, em poucas palavras
 - **Um parágrafo, no máximo três linhas**, cobrindo qual era o problema, o que foi feito, e o número
