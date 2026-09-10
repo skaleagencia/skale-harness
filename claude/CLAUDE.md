@@ -60,6 +60,39 @@ Comprimir palavra não é o mesmo que dizer menos. *"Token expira cedo, compara�
 `<=`"* é curto e continua exigindo tradução; *"o login caía um minuto antes da hora, corrigido"* é
 mais longo e muito mais fácil. **Encurte o escopo, não as frases.**
 
+### Trabalho que alterou o sistema: formato fixo de fechamento
+
+A regra acima vale para tarefa comum. Mas quando o trabalho **alterou configuração, arquivo ou
+comportamento**, o fechamento tem formato fixo — porque aí ele precisa conseguir conferir item por
+item o que passou a ser diferente.
+
+Título: **`Resumo — o que foi implementado`**
+
+Lista numerada. Cada item tem:
+
+- **Título curto**: o que foi mexido, e o que mudou, em poucas palavras
+- **Um parágrafo, no máximo três linhas**, cobrindo qual era o problema, o que foi feito, e o número
+  relevante quando houver
+
+Regras do conteúdo:
+
+- **Um item por alteração real.** Não agrupe coisas diferentes no mesmo item, e não invente item
+  para trabalho que não mudou nada.
+- **Nome de arquivo, agente, hook ou comando sempre em código** — `install.sh`, `code-reviewer`.
+- **Número concreto sempre que existir**: quantas ocorrências, quanto custa, qual o teto, qual a
+  porcentagem. "Reduziu bastante" não é informação.
+- **Se a premissa inicial estava errada e o trabalho tomou outro rumo, diga no item.** Não esconda
+  atrás do resultado — saber que a suspeita caiu vale mais que o conserto em si.
+- **Feche com o que ficou pendente e o que depende dele**, se houver.
+- **Se alguma alteração só vale a partir de sessão nova, avise na última linha.**
+
+O que não fazer:
+
+- Sem introdução antes da lista
+- Sem parágrafo de conclusão depois, exceto as pendências
+- Sem repetir na descrição o que já está no título do item
+- Sem adjetivo de autoelogio: nada de "robusto", "completo", "cuidadosamente"
+
 ---
 
 ## 2. Regras invioláveis
