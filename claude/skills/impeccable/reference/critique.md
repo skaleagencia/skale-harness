@@ -32,6 +32,26 @@ Resolve one stable target, run two independent assessments, synthesize a design 
 
 Delegate Assessment A and Assessment B to separate sub-agents. They must not see each other's output. Do not show findings to the user until synthesis.
 
+**Which sub-agent type to use — name it explicitly, never rely on the default.**
+
+| Assessment | `subagent_type` | Why |
+|---|---|---|
+| A — Design Review | `frontend-specialist` | Owns UI judgement; has `Skill` and `mcp__chrome-devtools` in its tools |
+| B — Detector + Browser Evidence | `frontend-specialist` | Needs `Bash` to run `detect.mjs` and `mcp__chrome-devtools` for the browser evidence — it is the only agent holding both |
+
+Leaving `subagent_type` unset makes the dispatch fall through to `general-purpose`, which carries no
+UI context and no browser tool. Measured on this setup: five such dispatches, each averaging millions
+of tokens, all of them avoidable.
+
+Note for whoever maintains this harness: Assessment B is mechanical — run the detector, collect the
+evidence, report. It does not need design judgement. When a narrower verification agent exists, B
+should move to it; A stays with `frontend-specialist`.
+
+**If a specialist is the one running this command, it cannot delegate at all** — the specialists in
+this harness declare `tools:` without `Agent`, by design, so that one specialist never dispatches
+another. In that case the sub-agent gate below applies and you fall back sequentially, with the
+degraded banner. That is expected, not a failure.
+
 Sub-agent gate (all harnesses):
 - Unless a harness-specific gate below overrides this, spawn A and B as two isolated, parallel sub-agents whenever a sub-agent/Task tool is exposed. This is the default and is mandatory; do not run them inline because it is faster.
 - "Unavailable" means exactly one thing: no sub-agent/Task tool is exposed in this session (or, on harnesses that ask, the user declined). It does not mean inconvenient.
