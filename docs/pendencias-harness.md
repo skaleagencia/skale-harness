@@ -91,3 +91,40 @@ pergunta é só "onde fica X".
   substituídos ou removidos. Varredura final: zero
 - **Caveman desligado** (global e no skale-insight) e regra nova de tamanho de relatório no
   CLAUDE.md — 2026-08-27
+
+---
+
+## O que está construído mas ainda não foi provado
+
+Movido do README em 2026-09-10. São itens de backlog: vão sair desta lista conforme cada um rodar
+de verdade pela primeira vez.
+
+| O quê | Estado | O que falta para sair daqui |
+|---|---|---|
+| As 3 skills do ClickUp | Escritas, instaladas, leitura testada contra as tarefas reais | Executar uma tarefa ponta a ponta, do "próximo" até "homologação" |
+| Template de backup do Supabase | Pronto, nunca rodou | Conta no R2, os 6 secrets no GitHub, e um teste de restauração |
+| Hook de bootstrap | Testado em pasta de teste | Abrir um projeto de verdade pela primeira vez |
+| Checkpoint automático | Testado em repositório de teste | Salvar um trabalho real antes de uma operação destrutiva |
+| Doc "Mapa do Repositório" no ClickUp | Não existe | Criar — sem ele o refino automático das tarefas sai genérico |
+| `rclone` | Não instalado | Necessário para a etapa de envio ao R2 |
+| `supabase` CLI | v2.84.2, existe v2.115.0 | Atualizar |
+
+**O item mais antigo e mais grave desta lista:** os bancos de produção dos quatro produtos seguem
+**sem backup**. O template está pronto desde 2026-08-20 e não foi aplicado.
+
+## Achados do levantamento de 2026-09-10
+
+Apurados ao mapear a configuração `.claude/` dos projetos. Nenhum foi corrigido.
+
+- **Dois projetos rodam com toda confirmação desligada** — `Skale CRM` e `LP Arden` têm
+  `defaultMode: bypassPermissions` no `settings.local.json`. Contraria a regra 8 do CLAUDE.md.
+- **Uma chave do Supabase gravada em texto** no `settings.json` do `Skale Finance Personal`,
+  dentro de uma regra de permissão que guardou um `curl` inteiro. É a chave publishable (pública,
+  feita para rodar no navegador), então o risco é baixo — mas é o efeito exato descrito na seção 3
+  do CLAUDE.md.
+- **Três projetos dependem do `~/.gitignore_global`** para ignorar o `.claude/` — arquivo que não
+  acompanha o repositório. Em outra máquina, essa configuração passa a aparecer para commit.
+- **O `.claude/` do skale-insight tem 5,4 MB, e 5,2 MB são backups gerados** por automação. 96% do
+  peso é arquivo descartável.
+- **O `CLAUDE.md` do skale-insight aponta para `.claude/skills/graphify/SKILL.md`**, e essa pasta
+  está vazia.

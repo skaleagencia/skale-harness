@@ -561,40 +561,32 @@ Supabase (só se o projeto usar Supabase).
 
 ---
 
-## 13. Ressalvas honestas
+## 13. Armadilhas conhecidas da ferramenta
 
-Documentação que só elogia é propaganda. Isto ainda não foi provado na prática:
+Não são pendências — não vão deixar de ser verdade quando o resto ficar pronto. É como o Claude
+Code funciona, e cada uma destas já custou tempo aqui.
 
-- **As 3 skills do ClickUp** (`/clickup`, `/clickup-executar`, `/clickup-fila`) nunca rodaram ponta
-  a ponta contra o ClickUp real.
-- **O template de backup do Supabase nunca rodou**: nenhum dump foi gerado, nada foi enviado ao
-  R2, e a restauração nunca foi testada. Até isso acontecer, os bancos de produção dos quatro
-  produtos seguem **sem backup**.
-- **O hook de bootstrap** (`bootstrap-projeto.mjs`) nunca rodou ao abrir um projeto de verdade — só
-  em pasta de teste.
-- **O checkpoint automático** foi testado em repositório de teste, não em uso real.
-- **O modo permissivo é escolha deliberada de risco**: nada bloqueia exceto navegador, e a lista de
-  bloqueio (`deny`) está vazia. Ler um arquivo de credencial passa a ser liberado, e o conteúdo
-  lido fica gravado no transcript da conversa.
-- **O Doc "Mapa do Repositório" não existe no ClickUp** — o refino automático das tarefas (seção 8)
-  sai mais genérico até ele existir.
-- **Duas entradas de configuração no projeto skale-insight** (`hook-guard search` e
-  `hook-guard read`, em `.claude/settings.json`) chamam o programa `graphify` pelo caminho fixo
-  `/Users/ericsoarese/.local/bin/graphify` — quebram em outro computador.
-- **Regra de permissão com caminho para `Write`/`Glob`/`NotebookEdit` é aceita, mas nunca
-  consultada** — escrever `Write(**)` em vez do nome nu não filtra nada, porque esses três avaliam
-  pelo nome da ferramenta, não por padrão de caminho. É por isso que `claude/permissoes.json`
-  insiste no nome nu para esses três. O que muda de versão para versão do Claude Code é só se isso
-  gera algum aviso na tela — hoje instalada a v2.1.237, não confirmado se ela avisa.
-- **O Claude Code regrava o `settings.json` inteiro a cada aprovação**, a partir do que tem em
-  memória: editar esse arquivo com a sessão aberta é perder a edição sem aviso.
+- **O `settings.json` é regravado inteiro a cada aprovação**, a partir do que a sessão tem em
+  memória. Editar esse arquivo com o Claude Code aberto é perder a edição sem aviso — por isso o
+  `install.sh` pede para rodar com ele fechado.
 - **Um comando aprovado vira regra permanente com o texto literal dentro.** Um segredo digitado
-  numa linha de comando fica escrito em texto puro no arquivo de configuração, para sempre — é por
-  isso que a seção 3 do `claude/CLAUDE.md` proíbe colar segredo em qualquer comando.
-- **`rclone` ainda não está instalado** nesta máquina — é necessário para a fase 3 do backup do
-  Supabase (subir para o R2), então mesmo aplicando o template hoje essa etapa ainda dependeria
-  desse passo.
-- **`supabase CLI` está desatualizado** (v2.84.2 instalada, existe v2.115.0).
+  numa linha de comando fica escrito em texto puro no arquivo de configuração, para sempre. É a
+  razão da regra da seção 3 do [claude/CLAUDE.md](claude/CLAUDE.md): nunca colar segredo em comando.
+- **Regra de permissão com caminho para `Write`, `Glob` e `NotebookEdit` é aceita e nunca
+  consultada.** Escrever `Write(**)` não filtra nada — esses três avaliam pelo nome da ferramenta.
+  É por isso que [claude/permissoes.json](claude/permissoes.json) usa o nome nu nos três.
+- **`deny` vence `ask`, que vence `allow`, em qualquer escopo** — e não depende de a regra ser mais
+  específica. Um `deny` global não pode ser furado pelo `settings.json` de um projeto.
+- **Configuração de projeto vence a global e não aparece na tela.** `model`, `env` e `permissions`
+  no `.claude/settings.json` de um projeto sobrescrevem o global em silêncio. Ao ver algo rodando
+  diferente do esperado, conferir esses três antes de desconfiar do global.
+- **Hook que está no disco mas não está registrado no `settings.json` não dispara.** Ter o arquivo
+  não é ter a proteção.
+- **Cada despacho de especialista custa cerca de 4 milhões de tokens** — medido nesta máquina, não
+  os 25 a 35 mil da inicialização. É o que justifica a regra de quando não delegar.
+
+O que ainda **não foi provado na prática** — skills do ClickUp, template de backup, bootstrap,
+checkpoint — está no backlog, em [docs/pendencias-harness.md](docs/pendencias-harness.md).
 
 ---
 
