@@ -355,3 +355,48 @@ demais para conclusão.
    uma frase dizendo o que ela entrega em linguagem de produto, no mesmo dia da instalação.
 3. **Se for arquivo** (categoria A — skill, hook, agente, CLAUDE.md, settings.json), rodar
    `./backup.sh` para levar o arquivo novo para dentro do repositório.
+
+---
+
+## Decisões pendentes que se fecharam com dado — 2026-09-10
+
+**`database-architect`: mantido.** A decisão de 27/08 foi "manter e medir". Medido: 3 despachos em
+14 dias, 8,0 milhões de tokens, 0,55% do consumo. Ele é usado e é barato — a fronteira com o
+`migration-specialist` (desenhar versus aplicar) se sustenta na prática.
+
+**Revisor e explorador canônicos: resolvido por desinstalação.** Os plugins `pr-review-toolkit`,
+`feature-dev` e `code-review` saíram em 01/09. Não havia mais o que decidir: os dois últimos
+despachavam de 6 a 10 subagentes por invocação, sempre os do próprio plugin. Os canônicos são os
+globais — `code-reviewer` (opus/xhigh) para revisão, `explorer` (haiku) para localizar e
+`code-explorer` (sonnet/high) para interpretar.
+
+## Baseline de consumo — medido em 2026-09-10
+
+Registrado para comparar depois das correções desta leva. Janela: 14 dias. Método: soma dos campos
+de `usage` dos arquivos de subagente, deduplicada por identificador de requisição.
+
+| | Valor |
+|---|---|
+| Total | 1,46 bilhão de tokens em 418 despachos |
+| `frontend-specialist` | 40,9% do gasto · 73 despachos · **8,18M por despacho** |
+| `backend-specialist` | 24,4% · **3,53M por despacho** |
+| `debugger` | 7,1% |
+| `general-purpose` | 7,0% |
+| Média geral | ~4M por despacho |
+
+**O que a análise de 10/09 acrescentou, e que muda onde procurar ganho:**
+
+- **97,7% do custo é contexto relido** (`cache_read`), não conteúdo novo entrando (2,3%).
+- **O custo escala mais que proporcionalmente com o número de turnos.** Um despacho de 120 turnos
+  custa 32 vezes um de 20 turnos — não 6 vezes. Cada turno relê a pilha inteira acumulada.
+- **Um terço dos despachos carrega 80% do gasto**: os 24 com 50 turnos ou mais.
+- **Despacho que abre navegador custa 5,5 vezes mais**, e cada turno dele já é 1,76 vez mais caro
+  isoladamente. São 37% dos despachos e 76% do gasto do agente.
+- **`take_snapshot` não é o vilão** — 900 a 1.800 tokens por chamada, mais barato que screenshot.
+  As 79 chamadas somam 0,02% do gasto. Limitar não traria ganho nenhum.
+- **21% das chamadas de navegador são repetição literal** (num caso, o mesmo screenshot 12 vezes),
+  mas somam só 0,04% do gasto. Vale corrigir por higiene, não por economia.
+
+**Como medir de novo:** repetir a mesma contagem por agente daqui a 14 dias e comparar a média por
+despacho do `frontend-specialist`. É o número que a mudança de 10/09 (teto de 60 turnos e regras de
+agrupamento) deve derrubar.
