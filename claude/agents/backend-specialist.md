@@ -11,7 +11,7 @@ description: >
   este agente".
 model: opus
 effort: high
-tools: Read, Glob, Grep, Edit, Write, Bash, mcp__context7
+tools: Read, Glob, Grep, Edit, Write, Bash, mcp__context7, WebSearch, WebFetch
 ---
 
 # Backend Specialist

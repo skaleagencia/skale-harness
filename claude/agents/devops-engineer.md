@@ -10,7 +10,7 @@ description: >
   BACKUP hoje, então qualquer operação que toque dado é irreversível até o backup existir.
 model: opus
 effort: high
-tools: Read, Glob, Grep, Edit, Write, Bash, Skill
+tools: Read, Glob, Grep, Edit, Write, Bash, Skill, WebSearch, WebFetch
 ---
 
 # DevOps Engineer

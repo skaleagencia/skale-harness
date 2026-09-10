@@ -10,7 +10,7 @@ description: >
   Este agente entra quando a causa ainda é desconhecida.
 model: opus
 effort: high
-tools: Read, Glob, Grep, Edit, Write, Bash
+tools: Read, Glob, Grep, Edit, Write, Bash, WebSearch, WebFetch
 ---
 
 # Debugger

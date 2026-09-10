@@ -293,6 +293,21 @@ que este trabalho não cabe no despacho anterior.
 frontmatter, de propósito. Se um relatório recomendar acionar outro agente, quem despacha é a sessão
 principal.
 
+**As skills do `superpowers` trazem `Subagent (general-purpose):` escrito nos exemplos.** Nunca
+despache assim — traduza:
+
+| Quando a skill pedir | Despache |
+|---|---|
+| Revisar código, tarefa concluída, especificação ou plano | `code-reviewer` |
+| Implementar uma tarefa do plano | `backend-specialist` ou `frontend-specialist`, conforme o domínio |
+| Corrigir teste falhando | `test-writer` |
+| Explorar código antes de decidir | `code-explorer` |
+| Localizar arquivo ou uso | `explorer` |
+
+O caso mais caro é a `requesting-code-review`, que manda revisar código com o genérico existindo um
+revisor em opus/xhigh com o checklist desta stack. O genérico só entra quando nenhum dos 17 cobre o
+trabalho — hoje isso acontece em manutenção do próprio harness e em pesquisa na web.
+
 **O critério do tier não é a categoria da tarefa.** "Código = sonnet, documentação = haiku" erra: um
 documento de arquitetura pode exigir opus, e um "código" que só renomeia campo roda em haiku. O que
 decide é se a tarefa exige **julgamento** ou é **mecânica**.

@@ -187,7 +187,6 @@ chamados por mim). Categoria A.
 | orchestration-mode.mjs | A cada mensagem minha, ativa no Claude Code o modo "chefe de equipe": ele delega para agentes especialistas em vez de tentar fazer tudo sozinho na mesma conversa. | A | `./install.sh` (copia `claude/hooks/orchestration-mode.mjs`) |
 | bootstrap-projeto.mjs | Ao abrir um projeto pela primeira vez, lista o que falta ali (mapa do código, CLAUDE.md, regras, integrações) explicando para que serve cada coisa, e **oferece** criar. Nunca executa sozinho, pergunta uma vez só e nunca mais. | A | `./install.sh` |
 | secret-scan.mjs | Antes de gravar qualquer arquivo, recusa a escrita se o conteúdo tiver cara de senha, chave ou token. É o único que bloqueia de verdade — e bloqueia de propósito. | A | `./install.sh` |
-| guard-main-branch.mjs | Antes de um commit ou envio direto na branch principal, pede confirmação. Branch de trabalho passa direto. **Está no disco mas NÃO registrado no settings.json — hoje não dispara.** Foi desregistrado em 2026-08-25, quando o modo permissivo entrou: ele pedia confirmação, que é justamente o que a política nova dispensa. O aviso de comando destrutivo cobre o caso sem interromper. | A | `./install.sh` |
 | validate-settings-schema.mjs | Depois de editar um arquivo de configuração do Claude Code, avisa se ele ficou com formato inválido — antes de você descobrir na próxima sessão, quando nada carrega. | A | `./install.sh` |
 | large-file-warning.mjs | Avisa quando um arquivo passa de ~350 linhas, sugerindo dividir. Só avisa. | A | `./install.sh` |
 
