@@ -1,0 +1,65 @@
+{
+  "_leia_isto": [
+    "Por que existe este mapa em vez de deduzir o caminho pelo nome do slug: cinco dos seis",
+    "projetos têm espaço no nome, o caminho até eles também tem espaço, e o Skale Finance Business",
+    "tem uma pasta duplicada dentro de si mesma (sobra de extração de zip) — o '.claude' real fica",
+    "um nível mais fundo do que o nome do projeto sugere. Deduzir o caminho a partir do slug quebra",
+    "nesses casos. Por isso cada projeto abaixo aponta para o caminho absoluto real, conferido à mão",
+    "nesta máquina em 2026-09-10.",
+    "",
+    "Como os scripts usam isto: install.sh copia claude/projetos/<chave>/ para dentro de",
+    "'<caminho>/.claude/'. backup.sh faz o caminho inverso, trazendo '<caminho>/.claude/<item>' para",
+    "claude/projetos/<chave>/. Nenhum dos dois cria o projeto — se 'caminho' não existir nesta",
+    "máquina, o projeto é pulado e reportado, nunca criado.",
+    "",
+    "LISTA BRANCA — só isto é espelhado: agents/, hooks/, rules/, memory/, settings.json.",
+    "FORA, sempre: settings.local.json (override de máquina — tem a maior precedência entre os",
+    "settings de projeto, por isso nunca deve ser copiado por cima do que já está na máquina de",
+    "outra pessoa), backups/ (dump gerado, não configuração), .bootstrap-check (estado de controle),",
+    "e skills/ quando está vazia.",
+    "",
+    "'espelha': false quer dizer que hoje o projeto só tem arquivo de fora da lista branca — está",
+    "registrado aqui para não sumir do mapa, mas não ganhou pasta em claude/projetos/<chave>/ porque",
+    "não há nada para copiar. O campo é um retrato do que existia em 2026-09-10, não é recalculado",
+    "sozinho: se o projeto ganhar agents/, hooks/, rules/, memory/ ou settings.json de verdade, o",
+    "próximo './backup.sh' já traz o conteúdo — só o valor do campo aqui não se atualiza sem alguém",
+    "editar à mão."
+  ],
+
+  "projetos": {
+    "skale-insight": {
+      "nome": "skale-insight",
+      "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/skale-insight",
+      "espelha": true
+    },
+    "skale-finance-personal": {
+      "nome": "Skale Finance Personal",
+      "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/Skale Finance Personal",
+      "espelha": true
+    },
+    "skale-crm": {
+      "nome": "Skale CRM",
+      "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/Skale CRM",
+      "espelha": false,
+      "motivo": "só tem settings.local.json — nada da lista branca para copiar"
+    },
+    "lp-arden": {
+      "nome": "LP Arden",
+      "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/LP Arden",
+      "espelha": false,
+      "motivo": "só tem settings.local.json — nada da lista branca para copiar"
+    },
+    "skale-finance-business": {
+      "nome": "Skale Finance Business",
+      "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/Skale Finance Business/Skale Finance Business",
+      "espelha": false,
+      "motivo": "só tem settings.local.json e .bootstrap-check — nada da lista branca. Caminho um nível mais fundo do que o esperado: existe uma pasta 'Skale Finance Business' duplicada dentro da pasta 'Skale Finance Business' (sobra de extração de zip), e o .claude real está dentro da de dentro"
+    },
+    "skale-harness": {
+      "nome": "Skale Harness (este repositório)",
+      "caminho": "/Users/ericsoarese/Projetos Vibing Code/Cloude code/Skale Harness",
+      "espelha": false,
+      "motivo": "só tem .bootstrap-check — nada da lista branca. É o próprio harness: a configuração dele é este repositório, não precisa de espelho à parte"
+    }
+  }
+}

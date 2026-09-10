@@ -17,6 +17,11 @@ BACKUPS="$REPO/backups-locais"
 
 ITENS=(CLAUDE.md settings.json agents skills hooks commands)
 
+# Config POR PROJETO (<projeto>/.claude/) — mapa em claude/projetos/projetos.json, lista branca
+# menor que a global porque CLAUDE.md e skills de projeto não são espelhados (ver claude/MANIFEST.md).
+PROJETOS_JSON="$REPO/claude/projetos/projetos.json"
+ITENS_PROJETO=(agents hooks rules memory settings.json)
+
 VAULT_OBSIDIAN="$HOME/ObsidianVault-Skale"
 
 # ---------------------------------------------------------------- utilidades
@@ -156,6 +161,67 @@ instalar_plugins() {
   done < <(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$ORIGEM/settings.json" 2>/dev/null)
 }
 
+# ---------------------------------------------------------- config por projeto
+
+# Diferente de instalar_arquivos: aqui o destino não é ~/.claude, é o .claude/ de cada projeto
+# listado em claude/projetos/projetos.json — e cada um mora num caminho próprio na máquina.
+# Mesmo sentido único do resto do script (repositório -> máquina), mas com uma regra a mais:
+# NUNCA cria a pasta do projeto. Se o caminho não existir aqui, só avisa e segue — este script
+# não sabe (e não deve adivinhar) se o projeto só não foi clonado ainda nesta máquina.
+sincronizar_projetos() {
+  titulo "Configuração por projeto"
+
+  if [[ ! -f "$PROJETOS_JSON" ]]; then
+    amarelo "  claude/projetos/projetos.json não existe — nada para sincronizar."
+    return 0
+  fi
+
+  local sincronizados=0 pulados=0
+
+  while IFS=$'\t' read -r slug caminho; do
+    [[ -z "$slug" ]] && continue
+
+    if [[ ! -d "$caminho" ]]; then
+      amarelo "  $slug não encontrado nesta máquina — ignorado"
+      pulados=$((pulados + 1))
+      continue
+    fi
+
+    local origem_projeto="$REPO/claude/projetos/$slug" destino_projeto="$caminho/.claude"
+
+    # Projeto registrado no mapa mas sem pasta em claude/projetos/<slug>/ — hoje ele só tem
+    # arquivo fora da lista branca (settings.local.json, .bootstrap-check). Nada para copiar.
+    if [[ ! -d "$origem_projeto" ]]; then
+      echo "  ok  $slug  (nada da lista branca para espelhar)"
+      sincronizados=$((sincronizados + 1))
+      continue
+    fi
+
+    mkdir -p "$destino_projeto"
+    local copiados=0
+    for item in "${ITENS_PROJETO[@]}"; do
+      local o="$origem_projeto/$item"
+      if [[ -d "$o" ]]; then
+        mkdir -p "$destino_projeto/$item"
+        rsync -aL --exclude '.DS_Store' "$o/" "$destino_projeto/$item/"
+        copiados=$((copiados + 1))
+      elif [[ -f "$o" ]]; then
+        rsync -a "$o" "$destino_projeto/$item"
+        copiados=$((copiados + 1))
+      fi
+    done
+
+    # Mesmo motivo do bloco global: hook não roda sem bit de execução.
+    [[ -d "$destino_projeto/hooks" ]] && chmod +x "$destino_projeto"/hooks/* 2>/dev/null
+
+    verde "  ok  $slug  ($copiados item(ns) de ${ITENS_PROJETO[*]})"
+    sincronizados=$((sincronizados + 1))
+  done < <(jq -r '.projetos | to_entries[] | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
+
+  echo
+  verde "  $sincronizados projeto(s) sincronizado(s), $pulados pulado(s) (não encontrado nesta máquina)."
+}
+
 # --------------------------------------------------------------- verificação
 
 verificar() {
@@ -293,6 +359,7 @@ fazer_backup
 
 instalar_arquivos
 instalar_plugins
+sincronizar_projetos
 verificar
 relatorio
 

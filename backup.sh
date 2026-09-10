@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 #
-# backup.sh — copia a configuração viva de ~/.claude/ para claude/ neste repositório.
+# backup.sh — copia a configuração viva de ~/.claude/ para claude/ neste repositório, e a
+# configuração de cada projeto (mapa em claude/projetos/projetos.json) para claude/projetos/.
 #
 #   ./backup.sh              importa a configuração da máquina para o repositório
 #   ./backup.sh --diferencas mostra o que mudou de cada lado, SEM copiar nada
 #
-# Sentido único: máquina  ->  repositório. Nunca escreve em ~/.claude/ (isso é o install.sh).
+# Sentido único: máquina  ->  repositório. Nunca escreve em ~/.claude/ nem no .claude/ de projeto
+# nenhum (isso é o install.sh).
 #
 # Lista branca, não lista negra: só entra o que está em ITENS abaixo. Sessão, cache, histórico,
 # transcript de conversa e credencial ficam de fora por construção — se um arquivo novo aparecer
@@ -20,6 +22,11 @@ DEST="$REPO/claude"
 
 ITENS=(CLAUDE.md settings.json agents skills hooks commands)
 
+# Config POR PROJETO — mesmo sentido (máquina -> repositório), mapa em claude/projetos/projetos.json.
+# Lista branca menor que a global: CLAUDE.md e skills de projeto não são espelhados (ver MANIFEST.md).
+PROJETOS_JSON="$DEST/projetos/projetos.json"
+ITENS_PROJETO=(agents hooks rules memory settings.json)
+
 # Lixo que não é configuração e só engorda o repositório.
 EXCLUDES=(--exclude '.DS_Store' --exclude 'node_modules/' --exclude '*.log')
 
@@ -31,46 +38,73 @@ fi
 # Responde a pergunta "alguma coisa mudou na minha máquina sem eu saber?" — por exemplo, uma
 # sessão em outro projeto que instalou um hook novo no global. Sem isto, a única forma de
 # descobrir seria rodar o backup e ler o `git status`, o que já mistura descobrir com copiar.
+# Compara UM item (arquivo solto ou pasta) dos dois lados e imprime cada diferença com o sinal
+# certo. Extraído da antiga comparar() para servir tanto o bloco global (~/.claude/) quanto cada
+# projeto — mesma lógica, dois conjuntos de caminhos. Soma em $total, que é local de quem chama
+# (bash enxerga o local do chamador dentro da função chamada, sem precisar declarar de novo).
+comparar_item() {
+  local label="$1" maquina="$2" repo="$3"
+
+  # Arquivo solto (CLAUDE.md, settings.json)
+  if [[ -f "$maquina" || -f "$repo" ]]; then
+    if   [[ ! -f "$repo"    ]]; then echo "  +  $label — está na máquina, não está versionado"; total=$((total+1))
+    elif [[ ! -f "$maquina" ]]; then echo "  -  $label — versionado aqui, não está na máquina"; total=$((total+1))
+    elif ! cmp -s "$maquina" "$repo"; then echo "  ~  $label — os dois têm, com conteúdo diferente"; total=$((total+1))
+    fi
+    return
+  fi
+
+  # "return 0", não "return": sem argumento ele herda o status do teste [[ ]] que acabou de
+  # falhar (1) — e como agora isto é uma função chamada como comando solto no loop, esse 1
+  # dispara o "set -e" do script inteiro. Faltar dos dois lados não é erro, é só "nada a dizer".
+  [[ -d "$maquina" || -d "$repo" ]] || return 0
+
+  # Pasta: compara a lista de arquivos dos dois lados, por caminho relativo.
+  # Caminho relativo é o que faz isto funcionar mesmo com espaço no nome da pasta do repositório.
+  local lista_m lista_r
+  lista_m="$(mktemp)"; lista_r="$(mktemp)"
+  [[ -d "$maquina" ]] && (cd "$maquina" && find -L . -type f 2>/dev/null | sed 's|^\./||' | sort) > "$lista_m"
+  [[ -d "$repo"    ]] && (cd "$repo"    && find -L . -type f 2>/dev/null | sed 's|^\./||' | sort) > "$lista_r"
+
+  while IFS= read -r f; do [[ -n "$f" ]] && { echo "  +  $label/$f — apareceu na máquina, não está versionado"; total=$((total+1)); }
+  done < <(comm -23 "$lista_m" "$lista_r")
+
+  while IFS= read -r f; do [[ -n "$f" ]] && { echo "  -  $label/$f — versionado aqui, falta na máquina"; total=$((total+1)); }
+  done < <(comm -13 "$lista_m" "$lista_r")
+
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && ! cmp -s "$maquina/$f" "$repo/$f" && { echo "  ~  $label/$f — os dois têm, com conteúdo diferente"; total=$((total+1)); }
+  done < <(comm -12 "$lista_m" "$lista_r")
+
+  rm -f "$lista_m" "$lista_r"
+}
+
 comparar() {
-  echo "Comparando ~/.claude/  com  claude/ deste repositório."
+  echo "Comparando ~/.claude/  com  claude/ deste repositório,"
+  echo "e cada projeto de claude/projetos/projetos.json com o .claude/ dele na máquina."
   echo "Nada é copiado — isto só mostra as diferenças."
   echo
 
   local total=0
 
   for item in "${ITENS[@]}"; do
-    local maquina="$CLAUDE_HOME/$item" repo="$DEST/$item"
-
-    # Arquivo solto (CLAUDE.md, settings.json)
-    if [[ -f "$maquina" || -f "$repo" ]]; then
-      if   [[ ! -f "$repo"    ]]; then echo "  +  $item — está na máquina, não está versionado"; total=$((total+1))
-      elif [[ ! -f "$maquina" ]]; then echo "  -  $item — versionado aqui, não está na máquina"; total=$((total+1))
-      elif ! cmp -s "$maquina" "$repo"; then echo "  ~  $item — os dois têm, com conteúdo diferente"; total=$((total+1))
-      fi
-      continue
-    fi
-
-    [[ -d "$maquina" || -d "$repo" ]] || continue
-
-    # Pasta: compara a lista de arquivos dos dois lados, por caminho relativo.
-    # Caminho relativo é o que faz isto funcionar mesmo com espaço no nome da pasta do repositório.
-    local lista_m lista_r
-    lista_m="$(mktemp)"; lista_r="$(mktemp)"
-    [[ -d "$maquina" ]] && (cd "$maquina" && find -L . -type f 2>/dev/null | sed 's|^\./||' | sort) > "$lista_m"
-    [[ -d "$repo"    ]] && (cd "$repo"    && find -L . -type f 2>/dev/null | sed 's|^\./||' | sort) > "$lista_r"
-
-    while IFS= read -r f; do [[ -n "$f" ]] && { echo "  +  $item/$f — apareceu na máquina, não está versionado"; total=$((total+1)); }
-    done < <(comm -23 "$lista_m" "$lista_r")
-
-    while IFS= read -r f; do [[ -n "$f" ]] && { echo "  -  $item/$f — versionado aqui, falta na máquina"; total=$((total+1)); }
-    done < <(comm -13 "$lista_m" "$lista_r")
-
-    while IFS= read -r f; do
-      [[ -n "$f" ]] && ! cmp -s "$maquina/$f" "$repo/$f" && { echo "  ~  $item/$f — os dois têm, com conteúdo diferente"; total=$((total+1)); }
-    done < <(comm -12 "$lista_m" "$lista_r")
-
-    rm -f "$lista_m" "$lista_r"
+    comparar_item "$item" "$CLAUDE_HOME/$item" "$DEST/$item"
   done
+
+  if [[ -f "$PROJETOS_JSON" ]]; then
+    echo
+    echo "-- Projetos --"
+    while IFS=$'\t' read -r slug caminho; do
+      [[ -z "$slug" ]] && continue
+      if [[ ! -d "$caminho" ]]; then
+        echo "  ?  $slug — não encontrado nesta máquina, comparação pulada"
+        continue
+      fi
+      for item in "${ITENS_PROJETO[@]}"; do
+        comparar_item "$slug/$item" "$caminho/.claude/$item" "$DEST/projetos/$slug/$item"
+      done
+    done < <(jq -r '.projetos | to_entries[] | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
+  fi
 
   echo
   if [[ $total -eq 0 ]]; then
@@ -83,6 +117,53 @@ comparar() {
   fi
 }
 
+# Mesmo sentido do resto do script (máquina -> repositório), agora por projeto. SEM --delete,
+# pela mesma razão do bloco global logo abaixo: arquivo novo aqui e ainda não instalado não pode
+# ser apagado por engano.
+trazer_projetos() {
+  [[ -f "$PROJETOS_JSON" ]] || return 0
+
+  echo
+  echo "Projetos (claude/projetos/projetos.json)"
+  echo
+
+  local sincronizados=0 pulados=0
+
+  while IFS=$'\t' read -r slug caminho; do
+    [[ -z "$slug" ]] && continue
+
+    if [[ ! -d "$caminho" ]]; then
+      echo "  --  $slug (não encontrado nesta máquina)"
+      pulados=$((pulados + 1))
+      continue
+    fi
+
+    local origem_projeto="$caminho/.claude" destino_projeto="$DEST/projetos/$slug" copiados=0
+    for item in "${ITENS_PROJETO[@]}"; do
+      local o="$origem_projeto/$item"
+      if [[ -d "$o" ]]; then
+        mkdir -p "$destino_projeto/$item"
+        rsync -aL "${EXCLUDES[@]}" "$o/" "$destino_projeto/$item/" || [[ $? -eq 23 ]]
+        copiados=$((copiados + 1))
+      elif [[ -f "$o" ]]; then
+        mkdir -p "$destino_projeto"
+        rsync -aL "$o" "$destino_projeto/$item"
+        copiados=$((copiados + 1))
+      fi
+    done
+
+    if [[ $copiados -gt 0 ]]; then
+      echo "  ok  $slug  ($copiados item(ns) da lista branca)"
+    else
+      echo "  ok  $slug  (nada da lista branca nesta máquina)"
+    fi
+    sincronizados=$((sincronizados + 1))
+  done < <(jq -r '.projetos | to_entries[] | [.key, .value.caminho] | @tsv' "$PROJETOS_JSON" 2>/dev/null)
+
+  echo
+  echo "$sincronizados projeto(s) verificado(s), $pulados pulado(s) (não encontrado nesta máquina)."
+}
+
 if [[ "${1:-}" == "--diferencas" ]]; then
   comparar
   exit 0
@@ -91,6 +172,7 @@ fi
 # Guarda contra o erro mais fácil de cometer aqui: escrever um CLAUDE.md novo no repositório,
 # rodar o backup por reflexo, e ver a versão da máquina passar por cima do trabalho — sem aviso,
 # sem nada no Git para recuperar. Se há mudança não commitada em claude/, pergunta antes.
+# O pathspec "claude/" é recursivo: já cobre claude/projetos/ sozinho, sem precisar listar à parte.
 if git -C "$REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   # Inclui arquivo novo ainda não commitado (`??`): foi justamente um desses — um hook recém-criado
   # — que se perdeu na primeira versão desta guarda.
@@ -161,6 +243,9 @@ for item in "${ITENS[@]}"; do
   fi
 done
 
+trazer_projetos
+
+echo
 echo "Conferindo se algum segredo entrou junto..."
 if "$REPO/scripts/checar-segredos.sh" "$DEST"; then
   echo

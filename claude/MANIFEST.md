@@ -102,12 +102,12 @@ arquivo — a sessão principal só decide qual acionar, nunca refaz o trabalho 
 | explorer | haiku | (sem effort) | Só localiza — onde fica um arquivo, quem chama uma função, todo uso de algo. Não interpreta, não decide. |
 
 **Agentes locais do skale-insight** — vivem em `.claude/agents/` daquele projeto, não neste
-repositório. Não são instalados pelo `install.sh`; se o projeto mudar de máquina, precisam ser
-copiados à parte.
+repositório. Desde 2026-09-10 têm espelho em `claude/projetos/skale-insight/agents/` (ver seção
+**Configuração por projeto** abaixo) — o `install.sh` já traz esta tabela de volta numa máquina
+nova, junto com hooks, memórias e regras do projeto.
 
 | Agente | model | effort | Para quê |
 |---|---|---|---|
-| orchestrator | sonnet | medium | Coordena uma tarefa que atravessa vários domínios, delegando para os especialistas certos em vez de um agente genérico tentar tudo sozinho. |
 | product-manager | sonnet | medium | Esclarece um pedido ambíguo e prioriza o que entra no roadmap, antes de existir uma tarefa definida. |
 | product-owner | sonnet | medium | Traduz um objetivo de negócio em especificação técnica e define o critério de aceite de uma tarefa antes de começar a implementar. |
 | project-planner | sonnet | high | Quebra uma funcionalidade ou fase grande em tarefas menores e ordenadas, cada uma com critério de aceite, antes de começar a codar. |
@@ -127,6 +127,51 @@ desalinhados entre si.
 3. **Duas variáveis de ambiente anulam tudo em silêncio:** `CLAUDE_CODE_SUBAGENT_MODEL` e
    `CLAUDE_CODE_EFFORT_LEVEL`. Se qualquer uma estiver preenchida, o roteamento é ignorado sem dar
    erro — a de effort vence até o arquivo do agente.
+
+---
+
+## Configuração por projeto
+
+Tudo até aqui neste MANIFEST é a configuração **global** (`~/.claude/`) — vale para qualquer
+projeto aberto nesta máquina. Mas cada produto (skale-insight, Skale CRM, Skale Finance Business
+etc.) também pode ter a própria pasta `.claude/` **dentro do projeto**, com agente, hook, memória e
+regra que só fazem sentido ali. Até 2026-09-10 essa parte não tinha backup nenhum — vivia só no
+disco, e sumia se a máquina morresse. Desde então tem: `claude/projetos/projetos.json` mapeia cada
+projeto para o caminho dele nesta máquina, e `claude/projetos/<slug>/` guarda a cópia de cada um,
+seguindo a mesma lista branca do global.
+
+**O que é espelhado**: `agents/`, `hooks/`, `rules/`, `memory/`, `settings.json` — exatamente esses
+cinco, nem mais nem menos.
+
+**O que NUNCA é espelhado, e por quê**:
+- `settings.local.json` — é o *override* da máquina: tem a maior precedência entre os arquivos de
+  settings de um projeto, então é sempre específico de quem está usando aquele computador ali. Levar
+  o `settings.local.json` de uma máquina para outra sobrescreveria a preferência de quem já está lá.
+- `backups/` — dump gerado pelo próprio projeto (ex.: os 5,2 MB de JSON de teste do skale-insight),
+  não é configuração do Claude Code.
+- `.bootstrap-check` — arquivo de controle interno, marca que o projeto já respondeu à pergunta de
+  primeira abertura; não tem nada para restaurar.
+- `skills/`, quando está vazia — sem conteúdo, não há o que copiar.
+- `CLAUDE.md` do projeto **não entra hoje** — só a config das categorias acima.
+
+**Como funciona**: mesmo sentido dos dois scripts já existentes, só que apontando para dentro do
+projeto em vez de `~/.claude/`.
+- `./install.sh` — depois de instalar a config global, lê `projetos.json` e copia
+  `claude/projetos/<slug>/` para `<caminho do projeto>/.claude/`. Se o caminho não existir nesta
+  máquina, pula e avisa (`<slug> não encontrado nesta máquina — ignorado`) — **nunca cria a pasta do
+  projeto**, porque não é papel do harness decidir que um projeto existe aqui.
+- `./backup.sh` — traz o caminho inverso, de `<caminho do projeto>/.claude/<item>` para
+  `claude/projetos/<slug>/`. Sem `--delete`, pela mesma razão do backup global: um arquivo novo aqui
+  e ainda não instalado no projeto não pode ser apagado por engano.
+- `./backup.sh --diferencas` — mostra o que mudou dos dois lados, projeto por projeto, com os
+  mesmos sinais do bloco global (`+` apareceu na máquina, `-` só existe aqui, `~` os dois têm com
+  conteúdo diferente). Só mostra, não decide.
+
+**Como adicionar um projeto novo ao mapa**: abrir `claude/projetos/projetos.json` e acrescentar uma
+entrada com `nome`, o `caminho` absoluto real na máquina (conferido à mão — é fácil errar quando o
+nome tem espaço ou existe pasta duplicada, como aconteceu com o Skale Finance Business) e `espelha`
+(`true` se o projeto já tem algo da lista branca, `false` se só tem arquivo de fora dela). Rodar
+`./backup.sh` depois traz o conteúdo de verdade para dentro de `claude/projetos/<slug>/`.
 
 ---
 
@@ -229,6 +274,19 @@ mas os itens abaixo **não estão em nenhum lugar do Git** e precisam ser refeit
 ---
 
 ## Histórico de correções
+
+**2026-09-01 — removido o agente local `orchestrator` do skale-insight**
+
+Era um template vendorizado do kit externo `ag-kit`, copiado para o projeto e nunca adaptado: citava
+`mobile-developer` e `game-developer` — agentes que nunca existiram no skale-insight — e não tinha
+uma linha sobre Skale, `company_id`, RLS ou ClickUp, ou seja, nenhum conhecimento real do produto.
+Backup do arquivo em `backups-locais/si-agentes-20260901-192035.tar.gz`.
+
+**Não confundir com o hook `orchestration-mode.mjs`, que continua ATIVO** — os nomes são parecidos,
+mas são coisas diferentes: o hook (global, em `claude/hooks/`) já cumpre o papel de orquestrador em
+toda sessão, ativando o modo "chefe de equipe" que delega para especialista; o agente apagado era um
+arquivo separado, específico do skale-insight, que nunca chegou a ser usado de verdade. Remover um
+não tem nenhum efeito sobre o outro.
 
 **2026-08-22 — 18% do consumo ia para o agente genérico**
 
